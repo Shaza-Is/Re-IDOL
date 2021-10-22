@@ -1,13 +1,8 @@
-# Re-IDOL
-Code for submission to: (https://paperswithcode.com/rc2021)ML Reproducibility Challenge 2021 Fall Edition, a course project for CISC 867 Deep Learning, Queen's University.
-
-
-# reIDOL
->📋  A template README.md for code accompanying a Machine Learning paper
 
 # [Re] IDOL: Inertial Deep Orientation-Estimation and Localization
 
-This repository is the official implementation of [[Re] IDOL: Inertial Deep Orientation-Estimation and Localization](https://arxiv.org/abs/2030.12345). 
+This repository is the official implementation of [[Re] IDOL: Inertial Deep Orientation-Estimation and Localization](https://arxiv.org/abs/2030.12345). The code is being prepared for submission to: (https://paperswithcode.com/rc2021)ML Reproducibility Challenge 2021 Fall Edition, and a course project in CISC 867 Deep Learning, Queen's University.
+
 
 >📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
 
