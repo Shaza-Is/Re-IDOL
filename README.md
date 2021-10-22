@@ -5,9 +5,9 @@ Code for submission to: (https://paperswithcode.com/rc2021)ML Reproducibility Ch
 # reIDOL
 >📋  A template README.md for code accompanying a Machine Learning paper
 
-# My Paper Title
+# [Re] IDOL: Inertial Deep Orientation-Estimation and Localization
 
-This repository is the official implementation of [My Paper Title](https://arxiv.org/abs/2030.12345). 
+This repository is the official implementation of [[Re] IDOL: Inertial Deep Orientation-Estimation and Localization](https://arxiv.org/abs/2030.12345). 
 
 >📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
 
