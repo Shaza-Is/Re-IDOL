@@ -44,3 +44,6 @@ def generic_feathers() -> List[str]:
 
     for file in files: 
         os.remove(file)
+
+
+

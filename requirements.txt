@@ -7,7 +7,7 @@
 absl-py==0.14.0
     # via
     #   tensorboard
-    #   tensorflow
+    #   tensorflow-gpu
 alembic==1.4.1
     # via mlflow
 argon2-cffi==21.1.0
@@ -15,7 +15,7 @@ argon2-cffi==21.1.0
 argparse==1.4.0
     # via -r requirements.in
 astunparse==1.6.3
-    # via tensorflow
+    # via tensorflow-gpu
 attrs==21.2.0
     # via
     #   jsonschema
@@ -32,8 +32,6 @@ cffi==1.14.6
     # via argon2-cffi
 charset-normalizer==2.0.6
     # via requests
-clang==5.0
-    # via tensorflow
 click==8.0.2
     # via
     #   databricks-cli
@@ -51,6 +49,8 @@ debugpy==1.4.3
     # via ipykernel
 decorator==5.1.0
     # via ipython
+deepdiff==5.6.0
+    # via -r requirements.in
 defusedxml==0.7.1
     # via nbconvert
 docker==5.0.3
@@ -65,9 +65,9 @@ flask==2.0.2
     #   mlflow
     #   prometheus-flask-exporter
 flatbuffers==1.12
-    # via tensorflow
+    # via tensorflow-gpu
 gast==0.4.0
-    # via tensorflow
+    # via tensorflow-gpu
 gitdb==4.0.7
     # via gitpython
 gitpython==3.1.24
@@ -79,17 +79,17 @@ google-auth==1.35.0
 google-auth-oauthlib==0.4.6
     # via tensorboard
 google-pasta==0.2.0
-    # via tensorflow
+    # via tensorflow-gpu
 greenlet==1.1.2
     # via sqlalchemy
 grpcio==1.40.0
     # via
     #   tensorboard
-    #   tensorflow
+    #   tensorflow-gpu
 gunicorn==20.1.0
     # via mlflow
 h5py==3.1.0
-    # via tensorflow
+    # via tensorflow-gpu
 idna==3.2
     # via requests
 importlib-metadata==4.8.1
@@ -150,12 +150,14 @@ jupyterlab-pygments==0.1.2
     # via nbconvert
 jupyterlab-widgets==1.0.2
     # via ipywidgets
-keras==2.6.0
-    # via tensorflow
+keras==2.7.0
+    # via tensorflow-gpu
 keras-preprocessing==1.1.2
-    # via tensorflow
+    # via tensorflow-gpu
 kiwisolver==1.3.2
     # via matplotlib
+libclang==12.0.0
+    # via tensorflow-gpu
 loguru==0.5.3
     # via -r requirements.in
 mako==1.1.5
@@ -167,9 +169,7 @@ markupsafe==2.0.1
     #   jinja2
     #   mako
 matplotlib==3.4.3
-    # via
-    #   -r requirements.in
-    #   seaborn
+    # via -r requirements.in
 matplotlib-inline==0.1.3
     # via
     #   ipykernel
@@ -209,13 +209,14 @@ numpy==1.19.5
     #   pandas
     #   pyarrow
     #   scipy
-    #   seaborn
     #   tensorboard
-    #   tensorflow
+    #   tensorflow-gpu
 oauthlib==3.1.1
     # via requests-oauthlib
 opt-einsum==3.3.0
-    # via tensorflow
+    # via tensorflow-gpu
+ordered-set==4.0.2
+    # via deepdiff
 packaging==21.0
     # via
     #   bleach
@@ -225,7 +226,6 @@ pandas==1.3.3
     # via
     #   -r requirements.in
     #   mlflow
-    #   seaborn
 pandocfilters==1.5.0
     # via nbconvert
 parso==0.8.2
@@ -252,7 +252,7 @@ protobuf==3.18.0
     # via
     #   mlflow
     #   tensorboard
-    #   tensorflow
+    #   tensorflow-gpu
 ptyprocess==0.7.0
     # via
     #   pexpect
@@ -331,10 +331,6 @@ requests-oauthlib==1.3.0
 rsa==4.7.2
     # via google-auth
 scipy==1.7.1
-    # via
-    #   -r requirements.in
-    #   seaborn
-seaborn==0.11.2
     # via -r requirements.in
 send2trash==1.8.0
     # via notebook
@@ -353,7 +349,7 @@ six==1.15.0
     #   pytest-spec
     #   python-dateutil
     #   querystring-parser
-    #   tensorflow
+    #   tensorflow-gpu
 smmap==4.0.0
     # via gitdb
 sqlalchemy==1.4.25
@@ -367,17 +363,19 @@ tabulate==0.8.9
 tensorboard==2.6.0
     # via
     #   -r requirements.in
-    #   tensorflow
+    #   tensorflow-gpu
 tensorboard-data-server==0.6.1
     # via tensorboard
 tensorboard-plugin-wit==1.8.0
     # via tensorboard
-tensorflow==2.6.0
+tensorflow-estimator==2.7.0
+    # via tensorflow-gpu
+tensorflow-gpu==2.7.0
     # via -r requirements.in
-tensorflow-estimator==2.6.0
-    # via tensorflow
+tensorflow-io-gcs-filesystem==0.22.0
+    # via tensorflow-gpu
 termcolor==1.1.0
-    # via tensorflow
+    # via tensorflow-gpu
 terminado==0.12.1
     # via notebook
 testpath==0.5.0
@@ -409,7 +407,7 @@ typing-extensions==3.7.4.3
     # via
     #   gitpython
     #   pydantic
-    #   tensorflow
+    #   tensorflow-gpu
 urllib3==1.26.7
     # via requests
 wcwidth==0.2.5
@@ -426,11 +424,11 @@ wheel==0.37.0
     # via
     #   astunparse
     #   tensorboard
-    #   tensorflow
+    #   tensorflow-gpu
 widgetsnbextension==3.5.1
     # via ipywidgets
 wrapt==1.12.1
-    # via tensorflow
+    # via tensorflow-gpu
 zipp==3.6.0
     # via importlib-metadata
 

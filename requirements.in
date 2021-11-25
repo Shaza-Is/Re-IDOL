@@ -4,13 +4,13 @@ pandas
 jupyter
 tensorflow-gpu
 tensorboard
+deepdiff
 loguru
 argparse
 pytest
 pytest-cov
 pytest-spec
 matplotlib
-seaborn
 scipy
 pydantic
 python-dotenv
