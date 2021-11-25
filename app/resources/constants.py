@@ -4,7 +4,8 @@ from app.services.preprocessor import PreProcessor
 COMMAND_LINE_DESCRIPTION = ":reIDOL CLI tool"
 COMMAND_LINE_OPTIONS = """nn <command> [<args>]
 
-The most commonly used nn commands are: 
+The most commonly used nn commands are:
+    preprocess  Preprocesses data if data has not yet been preprocessed
     train       Trains network by using .env file parameters.
     predict     Receives data and returns a prediction.
 

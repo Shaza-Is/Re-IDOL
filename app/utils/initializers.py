@@ -5,14 +5,15 @@ from pandas import DataFrame
 from typing import List
 from glob import glob
 
+from app.models.options import Option
     
 def get_files(option: int) -> List[str]: 
     train_files = set(glob("datasets/building1/train/*.feather"))
 
-    if option == 4: 
+    if option == Option.TRAIN: 
         return train_files
     else: 
-        feather_files = set(glob(f"datasets/building{option}/*/*.feather"))
+        feather_files = set(glob(f"datasets/building{int(option)}/*/*.feather"))
         feather_files = feather_files - train_files
         return feather_files
 
