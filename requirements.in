@@ -5,6 +5,7 @@ jupyter
 tensorflow-gpu
 tensorboard
 deepdiff
+python-dotenv
 loguru
 argparse
 pytest

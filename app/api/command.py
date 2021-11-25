@@ -2,16 +2,19 @@ import argparse
 import sys
 import os
 
+from multiprocessing import Process
+from uuid import uuid4
+
 from app.resources.constants import (
     COMMAND_LINE_OPTIONS, 
     COMMAND_LINE_DESCRIPTION, 
     CMD_TRAIN_DESCRIPTION
 )
-
 from app.services.trainer import Trainer
 from app.services.preprocessor import PreProcessor
 from app.nn_models.nn_orient import ReOrientNet
-from app.utils.initializers import get_files, create_csv, create_data
+from app.models.options import Option
+from app.utils.process_workflow import do_preprocessing_work
 
 class CommandLine(object):
     """This is the command line interface 
@@ -38,9 +41,10 @@ class CommandLine(object):
         
         getattr(self, args.command)()
 
-    def train(self):
-        """Train is the command to use in order to train 
-        the neural network 
+    def preprocess(self):
+        """Preprocess will create the csv files with multithreading, 
+        one process is spawned for every file, so there will be 4 processes 
+        in total.  
         """
         
         print("Running training set initializers...\n")
@@ -53,37 +57,58 @@ class CommandLine(object):
         
         print("Creating train and test csvs...")
 
-        # TODO: Refactor lines 56-68
-
         train_file_path = "datasets/csvs/train.csv"
-        test_file_path = "datasets/csvs/building1.csv"
-
+        test_file_path1 = "datasets/csvs/building1.csv"
+        test_file_path2 = "datasets/csvs/building2.csv"
+        test_file_path3 = "datasets/csvs/building3.csv"
 
         if not os.path.exists(train_file_path):
-            train_files = get_files(option = 4)
-            train_df = create_data(files = train_files)
-            create_csv(train_df, "datasets/csvs/train.csv")
-        
-        if not os.path.exists(test_file_path):
-            test_files = get_files(option = 1)
-            test_df = create_data(files = test_files)
-            create_csv(test_df, "datasets/csvs/building1.csv")
+            option = Option.TRAIN
+            file_path = "datasets/csvs/train.csv"
 
-        pre = PreProcessor(train_csv=train_file_path, test_csv=test_file_path)
-        model = ReOrientNet()
-        trainer = Trainer(model)
+            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
+            process.start()
+  
+        if not os.path.exists(test_file_path1):
+            option = Option.BLD1
+            file_path = "datasets/csvs/building1.csv"
 
-        print("Preprocessing data....")
+            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
+            process.start()
 
-        (X_train, y_train) = pre.reshape_data(is_train = True)
-        (X_test, y_test) = pre.reshape_data(is_train = False)
+        if not os.path.exists(test_file_path2):
+            option = Option.BLD2
+            file_path = "datasets/csvs/building2.csv"
 
-        print("Running nn training, create .env file to change hyper parameters.")
+            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
+            process.start()
 
-        trainer.compile_model()
-        trainer.train_model(X_train, y_train)
+        if not os.path.exists(test_file_path3):
+            option = Option.BLD3
+            file_path = "datasets/csvs/building3.csv"
+
+            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
+            process.start()
 
 
+
+
+
+    def train(self):
+        pass
+        # pre = PreProcessor(train_csv=train_file_path, test_csv=test_file_path)
+        # model = ReOrientNet()
+        # trainer = Trainer(model)
+
+        # print("Preprocessing data....")
+
+        # (X_train, y_train) = pre.reshape_data(is_train = True)
+        # (X_test, y_test) = pre.reshape_data(is_train = False)
+
+        # print("Running nn training, create .env file to change hyper parameters.")
+
+        # trainer.compile_model()
+        # trainer.train_model(X_train, y_train)
 
 
     def predict(self):
