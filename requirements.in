@@ -6,6 +6,7 @@ tensorflow-gpu
 tensorboard
 deepdiff
 python-dotenv
+sklearn
 loguru
 argparse
 pytest
