@@ -2,19 +2,21 @@ import argparse
 import sys
 import os
 
-from multiprocessing import Process
-from uuid import uuid4
+from pydantic import ValidationError
 
 from app.resources.constants import (
     COMMAND_LINE_OPTIONS, 
     COMMAND_LINE_DESCRIPTION, 
-    CMD_TRAIN_DESCRIPTION
+    CMD_PREPROCESS_DESCRIPTION, 
+    CMD_TRAIN_DESCRIPTION,
+    CMD_TEST_DESCRIPTION
 )
 from app.services.trainer import Trainer
 from app.services.preprocessor import PreProcessor
 from app.nn_models.nn_orient import ReOrientNet
 from app.models.options import Option
-from app.utils.process_workflow import do_preprocessing_work
+from app.models.cmd_args import CommonArgs 
+from app.utils.initializers import get_files, create_data, create_csv, create_test_data
 
 class CommandLine(object):
     """This is the command line interface 
@@ -42,74 +44,67 @@ class CommandLine(object):
         getattr(self, args.command)()
 
     def preprocess(self):
-        """Preprocess will create the csv files with multithreading, 
-        one process is spawned for every file, so there will be 4 processes 
-        in total.  
+        """Preprocess will create a csv file for training purposes
         """
         
         print("Running training set initializers...\n")
 
         parser = argparse.ArgumentParser(
-            description = CMD_TRAIN_DESCRIPTION,
+            description = CMD_PREPROCESS_DESCRIPTION,
         )
 
         vars(parser.parse_args(sys.argv[2:]))
-        
-        print("Creating train and test csvs...")
+        print("Creating train csv...")
 
         train_file_path = "datasets/csvs/train.csv"
-        test_file_path1 = "datasets/csvs/building1.csv"
-        test_file_path2 = "datasets/csvs/building2.csv"
-        test_file_path3 = "datasets/csvs/building3.csv"
 
         if not os.path.exists(train_file_path):
             option = Option.TRAIN
             file_path = "datasets/csvs/train.csv"
 
-            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
-            process.start()
-  
-        if not os.path.exists(test_file_path1):
-            option = Option.BLD1
-            file_path = "datasets/csvs/building1.csv"
-
-            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
-            process.start()
-
-        if not os.path.exists(test_file_path2):
-            option = Option.BLD2
-            file_path = "datasets/csvs/building2.csv"
-
-            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
-            process.start()
-
-        if not os.path.exists(test_file_path3):
-            option = Option.BLD3
-            file_path = "datasets/csvs/building3.csv"
-
-            process = Process(target=do_preprocessing_work, args=(uuid4(), file_path, option))
-            process.start()
-
-
-
+            files = get_files(option)
+            df = create_data(files=files)
+            create_csv(df, file_path)
 
 
     def train(self):
-        pass
-        # pre = PreProcessor(train_csv=train_file_path, test_csv=test_file_path)
-        # model = ReOrientNet()
-        # trainer = Trainer(model)
+        """Train is used to perform training with one of 
+        the neural networks. There are three options to use here: 
+        1 = Building 1
+        2 = Building 2 
+        3 = Building 3
+        """
 
-        # print("Preprocessing data....")
+        parser = argparse.ArgumentParser(
+            description = CMD_TRAIN_DESCRIPTION
+        )
+        parser.add_argument("--option", required=True)
+        args = vars(parser.parse_args(sys.argv[2:]))
 
-        # (X_train, y_train) = pre.reshape_data(is_train = True)
-        # (X_test, y_test) = pre.reshape_data(is_train = False)
-
-        # print("Running nn training, create .env file to change hyper parameters.")
-
-        # trainer.compile_model()
-        # trainer.train_model(X_train, y_train)
+        try:
+            train_args = CommonArgs.parse_obj(args)
+        except ValueError as error:
+            print(str(error))
+            exit(1)
 
 
-    def predict(self):
-        pass
+    def test(self):
+        """Test is used to perform testing with one of the neural networks
+        for that was trained for each building. There are three options to use here: 
+        1 = Building 1
+        2 = Building 2
+        3 = Building 3
+        """
+
+        parser = argparse.ArgumentParser(
+            description = CMD_TRAIN_DESCRIPTION
+        )
+        parser.add_argument("--option", required=True)
+        args = vars(parser.parse_args(sys.argv[2:]))
+
+        try:
+            test_args = CommonArgs.parse_obj(args)
+        except ValueError as error:
+            print(str(error))
+            exit(1)
+
