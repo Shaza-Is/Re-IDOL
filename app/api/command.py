@@ -1,8 +1,10 @@
 import argparse
 import sys
 import os
+import tensorflow as tf
 
 from pydantic import ValidationError
+from loguru import logger
 
 from app.resources.constants import (
     COMMAND_LINE_OPTIONS, 
@@ -47,14 +49,14 @@ class CommandLine(object):
         """Preprocess will create a csv file for training purposes
         """
         
-        print("Running training set initializers...\n")
+        logger.info("Running training set initializers...")
 
         parser = argparse.ArgumentParser(
             description = CMD_PREPROCESS_DESCRIPTION,
         )
 
         vars(parser.parse_args(sys.argv[2:]))
-        print("Creating train csv...")
+        logger.info("Creating train csv...")
 
         train_file_path = "datasets/csvs/train.csv"
 
@@ -66,6 +68,7 @@ class CommandLine(object):
             df = create_data(files=files)
             create_csv(df, file_path)
 
+        logger.info("Train file created.")
 
     def train(self):
         """Train is used to perform training with one of 
@@ -83,8 +86,13 @@ class CommandLine(object):
 
         try:
             train_args = CommonArgs.parse_obj(args)
+            logger.info("Attempting to train neural network {option}".format(option=train_args.option))
+            
+            model = ReOrientNet()
+            model.compile(optimizer="Adam", loss=loss_fn, metrics=["accuracy"])
+            model.fit(X_train, y_train, epochs=10)
         except ValueError as error:
-            print(str(error))
+            logger.error(str(error))
             exit(1)
 
 
@@ -104,6 +112,7 @@ class CommandLine(object):
 
         try:
             test_args = CommonArgs.parse_obj(args)
+            logger.info("Testing neural network {option}".format(option=test_args.option))
         except ValueError as error:
             print(str(error))
             exit(1)

@@ -1,3 +1,5 @@
+from tensorflow.keras import Model, Input, layers
+
 class FirstNet(Model):
 
     def __init__(self):
@@ -12,3 +14,5 @@ class FirstNet(Model):
         X = self.hidden_1(X)
         X = self.hidden_2(X)
         X = self.output_layer(X)
+
+        return X
