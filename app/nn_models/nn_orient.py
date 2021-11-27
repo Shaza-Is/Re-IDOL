@@ -21,17 +21,16 @@ from app.resources.constants import (
 class ReOrientNet(Model):
     def __init__(self):
         super(ReOrientNet, self).__init__()
-        self.input_layer = layers.InputLayer(input_shape=(REORIENT_INPUT_SIZE_ROWS, REORIENT_INPUT_SIZE_COLS), 
-            batch_size=REORIENT_NET_BATCH_SIZE, name="ReOrientNet_Input")
+
         self.lstm_layer_1 = layers.LSTM(REORIENT_NET_LSTM_1, return_sequences=True, name="ReOrient_LSTM_1")
         self.lstm_layer_2 = layers.LSTM(REORIENT_NET_LSTM_2, return_sequences=False, name="ReOrient_LSTM_2")
         self.dense_layer_1 = layers.Dense(units=REORIENT_NET_DENSE_1, 
             activation=REORIENT_DENSE_ACTIVATION, name="ReOrient_Dense_1")
         self.dense_layer_2 = layers.Dense(units=REORIENT_NET_DENSE_2, 
             activation=REORIENT_DENSE_ACTIVATION, name="ReOrient_Dense_2")
-        self.dense_layer_3 = layers.Dense(units=REORIENT_NET_DENSE_1,
+        self.dense_layer_3 = layers.Dense(units=REORIENT_NET_DENSE_3,
             activation=REORIENT_DENSE_ACTIVATION,  name="ReOrient_Dense_3")
-        self.dense_layer_4 = layers.Dense(units=REORIENT_NET_DENSE_2,
+        self.dense_layer_4 = layers.Dense(units=REORIENT_NET_DENSE_4,
             activation=REORIENT_DENSE_ACTIVATION,  name="ReOrient_Dense_4")
 
         self.output_layer_1 = layers.Dense(units=REORIENT_NET_OUTPUT_1, name="ReOrient_Quaternion")
@@ -40,6 +39,18 @@ class ReOrientNet(Model):
 
     # TODO: Translate notebook layers into class based approach
     def call(self, inputs: Input, is_training: bool = False):
-        x = self.input_layer(x)
-        return x
+        x = layers.Concatenate()([inputs[0], inputs[1], inputs[2]])
+
+        x = self.lstm_layer_1(x)
+        x = self.lstm_layer_2(x)
+
+        x = self.dense_layer_1(x)
+        x = self.dense_layer_2(x)
+        theta = self.output_layer_1(x)
+        
+        x = self.dense_layer_3(x)
+        x = self.dense_layer_4(x)
+        sigma = self.output_layer_2(x)
+
+        return layers.Concatenate()([theta, sigma])
         

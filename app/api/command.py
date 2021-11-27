@@ -89,8 +89,10 @@ class CommandLine(object):
             logger.info("Attempting to train neural network {option}".format(option=train_args.option))
             
             model = ReOrientNet()
-            model.compile(optimizer="Adam", loss=loss_fn, metrics=["accuracy"])
-            model.fit(X_train, y_train, epochs=10)
+            trainer = Trainer(model)
+            trainer.compile_model()
+            trainer.train_model()
+
         except ValueError as error:
             logger.error(str(error))
             exit(1)

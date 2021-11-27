@@ -85,31 +85,3 @@ def create_test_data(files: List[str]) -> List[DataFrame]:
         dfs.append(df)
 
     return dfs
-
-
-def generate_training_samples(matrix: np.ndarray, batch_size: int = 64):
-    while True:
-
-        acc = np.array([row[0:3].tolist() for row in matrix])
-        gyro = np.array([row[3:6].tolist() for row in matrix])
-        mag = np.array([row[6:9].tolist() for row in matrix])
-        orient = np.array([row[9:].tolist() for row in matrix])
-
-        xa_batch = np.zeros((batch_size,100,3))
-        xg_batch = np.zeros((batch_size,100,3))
-        xm_batch = np.zeros((batch_size,100,3))
-        y_theta_batch = np.zeros((batch_size,4))
-        y_sigma_batch = np.finfo(np.float32).eps* np.ones((batch_size,6)) ## To remove
-        y_batch = np.concatenate((y_theta_batch, y_sigma_batch), axis=1)
-        
-        current_batch_number = 0
-        for index in range(len(orient)):
-
-            xa_batch[current_batch_number,:,:] = acc[index,:]
-            xg_batch[current_batch_number,:,:] = gyro[index,:]
-            xm_batch[current_batch_number,:,:] = mag[index,:]
-            y_theta_batch[current_batch_number,:4] = orient[index,:]
-            current_batch_number += 1
-            if current_batch_number >= batch_size:
-                current_batch_number = 0              
-                yield([xa_batch,xg_batch, xm_batch],[y_batch])
