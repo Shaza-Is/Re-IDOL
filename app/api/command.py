@@ -15,8 +15,8 @@ from app.resources.constants import (
 )
 from app.services.orient_trainer import OrientTrainer
 from app.services.pos_trainer import PosTrainer
-from app.services.preprocessor import PreProcessor
 from app.nn_models.nn_orient import ReOrientNet
+from app.nn_models.nn_position import PosNet
 from app.models.options import Option
 from app.models.cmd_args import CommonArgs 
 from app.utils.initializers import get_files, create_data, create_csv, create_test_data
@@ -87,12 +87,23 @@ class CommandLine(object):
 
         try:
             train_args = CommonArgs.parse_obj(args)
-            logger.info("Attempting to train neural network {option}".format(option=train_args.option))
+            logger.info("Attempting to train ReOrient Net {option}".format(option=train_args.option))
             
             model = ReOrientNet()
             trainer = OrientTrainer(model)
             trainer.compile_model()
             trainer.train_model()
+
+            logger.info("ReOrient Net training finished. Model weights have been saved.")
+
+            logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
+            
+            model2 = PosNet()
+            trainer2 = PosTrainer(model)
+            trainer2.compile_model()
+            trainer2.train_model()
+
+            logger.info("Pos Net training finished. Model weights have been saved.") 
 
         except ValueError as error:
             logger.error(str(error))
@@ -120,3 +131,5 @@ class CommandLine(object):
             print(str(error))
             exit(1)
 
+    def predict(self):
+        pass

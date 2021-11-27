@@ -98,6 +98,18 @@ def create_test_data(files: List[str]) -> List[DataFrame]:
 
 
 def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
+    """apply_minmax_scaling receives a matrix with magnetometer data
+    which is then applied a minmax scaler from sklearn to normalize the data. 
+    This is done to simulate Ellipsoid Fitting. A scaler is also saved 
+    to reapply it later on with test data.
+
+    Args:
+        mag_data (List[List[float]]): nx3 matrix containing X, Y, Z coordinates
+        with magnetometer data.
+
+    Returns:
+        List[List[float]]: nx3 matrix containing rescaled data. 
+    """
     scaler = None
     file_path = "saves/scaler/minmax.save"
     results = None
