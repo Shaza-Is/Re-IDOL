@@ -7,6 +7,7 @@ tensorboard
 deepdiff
 python-dotenv
 sklearn
+joblib
 loguru
 argparse
 pytest

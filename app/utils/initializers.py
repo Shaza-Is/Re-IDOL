@@ -1,14 +1,17 @@
 import pandas as pd
 import os
 import numpy as np
+import joblib
 
 from pandas import DataFrame
 from enum import IntEnum
 from typing import List
 from glob import glob
-
+from sklearn.preprocessing import MinMaxScaler
 
 from app.models.options import Option
+
+from typing import List
     
 def get_files(option: IntEnum) -> List[str]: 
     """get_files retrieves all the file paths related 
@@ -60,6 +63,13 @@ def create_data(files: List[str]) -> DataFrame:
 
     for file in files: 
         df = pd.read_feather(file)
+        mag_data = df[["iphoneMagX", "iphoneMagY", "iphoneMagZ"]].values.tolist()
+        result = apply_minmax_scaling(mag_data)
+        df2 = pd.DataFrame(result, columns=["iphoneMagX", "iphoneMagY", "iphoneMagZ"])
+        df["iphoneMagX"] = df2["iphoneMagX"]
+        df["iphoneMagY"] = df2["iphoneMagY"]
+        df["iphoneMagZ"] = df2["iphoneMagZ"]
+
         dfs.append(df)
     
     df2 = pd.concat(dfs, ignore_index=True)
@@ -85,3 +95,23 @@ def create_test_data(files: List[str]) -> List[DataFrame]:
         dfs.append(df)
 
     return dfs
+
+
+def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
+    scaler = None
+    file_path = "saves/scaler/minmax.save"
+    results = None
+
+    if os.path.exists(file_path):
+        scaler = joblib.load(file_path)
+        results = scaler.transform(mag_data)
+        return results
+    else: 
+        scaler = MinMaxScaler()
+        scaler.fit(mag_data)
+        results = scaler.transform(mag_data)
+        joblib.dump(scaler, file_path)
+        return results
+
+    
+    

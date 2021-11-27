@@ -36,8 +36,6 @@ class ReOrientNet(Model):
         self.output_layer_1 = layers.Dense(units=REORIENT_NET_OUTPUT_1, name="ReOrient_Quaternion")
         self.output_layer_2 = layers.Dense(units=REORIENT_NET_OUTPUT_2, name="ReOrient_Cov_Matrix")
 
-
-    # TODO: Translate notebook layers into class based approach
     def call(self, inputs: Input, is_training: bool = False):
         x = layers.Concatenate()([inputs[0], inputs[1], inputs[2]])
 

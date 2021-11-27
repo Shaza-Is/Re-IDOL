@@ -15,7 +15,7 @@ from app.nn_models.nn_orient_loss import ReOrientLoss
 
 from pprint import pprint
 
-class Trainer(object):
+class OrientTrainer(object):
 
     def __init__(self, model: Model):
         self.model = model

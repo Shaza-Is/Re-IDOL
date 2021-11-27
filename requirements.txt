@@ -127,7 +127,9 @@ jinja2==3.0.1
     #   nbconvert
     #   notebook
 joblib==1.1.0
-    # via scikit-learn
+    # via
+    #   -r requirements.in
+    #   scikit-learn
 jsonschema==3.2.0
     # via nbformat
 jupyter==1.0.0

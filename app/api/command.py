@@ -13,7 +13,8 @@ from app.resources.constants import (
     CMD_TRAIN_DESCRIPTION,
     CMD_TEST_DESCRIPTION
 )
-from app.services.trainer import Trainer
+from app.services.orient_trainer import OrientTrainer
+from app.services.pos_trainer import PosTrainer
 from app.services.preprocessor import PreProcessor
 from app.nn_models.nn_orient import ReOrientNet
 from app.models.options import Option
@@ -89,7 +90,7 @@ class CommandLine(object):
             logger.info("Attempting to train neural network {option}".format(option=train_args.option))
             
             model = ReOrientNet()
-            trainer = Trainer(model)
+            trainer = OrientTrainer(model)
             trainer.compile_model()
             trainer.train_model()
 
