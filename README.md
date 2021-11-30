@@ -3,6 +3,13 @@
 
 This repository is the official implementation of [[Re] IDOL: Inertial Deep Orientation-Estimation and Localization](https://arxiv.org/abs/2030.12345). The code is being prepared for submission to: (https://paperswithcode.com/rc2021)ML Reproducibility Challenge 2021 Fall Edition, and a course project in CISC 867 Deep Learning, Queen's University.
 
+1. Quaternion Multiplication -> See [here](https://www.sciencedirect.com/topics/computer-science/quaternion-multiplication)
+2. Yury Petrov's Ellipsoid Fitting (Python Version) -> See [here](https://github.com/marksemple/pyEllipsoid_Fit)
+3. Extended Kalman Filters -> See [here](https://towardsdatascience.com/extended-kalman-filter-43e52b16757d)
+4. 3Blue1Brown Quaternion Explanations -> See [here](https://www.youtube.com/watch?v=d4EgbgTm0Bg)
+5. IMUs and what they do -> See [here](https://www.arrow.com/en/research-and-events/articles/imu-principles-and-applications)
+6. What is a random walk? -> See [here]()
+
 
 >📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
 
@@ -18,47 +25,63 @@ pip install pip-tools
 Steps: 
 
 1. (Optional) To generate new requirements (after adding new requirement to requirements.in): 
+*Note*: This requires that you install pip-tools, if you haven't installed pip-tools then 
+please do `pip install pip-tools` to use the command below.
 
-```setup
+```sh
 pip-compile
 ```
 
 2. To setup virtual environment: 
 
-```setup
+```sh
 python -m venv .venv
 ```
 
 3. To activate virtual environment (unix): 
    
-```setup
+```sh
 source .venv/bin/activate
 ```
 
 4. To install requirements:
 
-```setup
+```sh
 pip install -r requirements.txt
 ```
 
+5. To setup the datasets: 
+    a. Create a folder called datasets.
+    b. Create another folder within datasets called csvs. You should have datasets/csvs as part of your folder structure
+    c. Download and extract the datasets from [here](https://zenodo.org/record/4484093). Extract each building into 
+    datasets.
+
 >📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
+
+## Preprocessing
+
+To run preprocessing steps for training, run this command: 
+
+```python
+python main.py preprocess
+```
 
 ## Training
 
 To train the model(s) in the paper, run this command:
 
-```train
-python train.py --input-data <path_to_data> --alpha 10 --beta 20
+```python
+python main.py train --option=<option number 1-3>
 ```
 
 >📋  Describe how to train the models, with example commands on how to train the models in your paper, including the full training procedure and appropriate hyperparameters.
 
 ## Evaluation
 
-To evaluate my model on ImageNet, run:
+To test the model(s) in the paper, run this command: 
 
-```eval
-python eval.py --model-file mymodel.pth --benchmark imagenet
+```python
+python main.py test --option=<option number 1-3>
 ```
 
 >📋  Describe how to evaluate the trained models on benchmarks reported in the paper, give commands that produce the results (section below).
@@ -79,12 +102,14 @@ Our model achieves the following performance on :
 
 | Model name       | Top 1 Accuracy | Top 5 Accuracy |
 | ---------------- | -------------- | -------------- |
-| My awesome model | 85%            | 95%            |
+| ReOrientNet      | x              | x              |
+| PosNet           | y              | y              | 
 
 >📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. 
 
 
 ## Contributing
+
 
 >📋  Pick a licence and describe how to contribute to your code repository. 
 

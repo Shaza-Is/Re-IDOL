@@ -1,16 +1,16 @@
-from tensorflow.keras import Model, layers
+from tensorflow.keras import Model, Input, layers
 
 from app.core.config import (
     POS_NET_LSTM_1,
     POS_NET_LSTM_2,
     POS_NET_DENSE_1,
     POS_NET_DENSE_2,
-    POS_NET_OUTPUT_1
+    POS_NET_OUTPUT_1,
     POS_NET_ACTIVATION_1,
     POS_NET_ACTIVATION_2
 )
 
-class RePositionNet(Model):
+class PosNet(Model):
     def __init__(self):
         super(RePositionNet, self).__init__()
         

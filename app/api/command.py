@@ -1,9 +1,7 @@
 import argparse
 import sys
 import os
-import tensorflow as tf
 
-from pydantic import ValidationError
 from loguru import logger
 
 from app.resources.constants import (
@@ -15,6 +13,7 @@ from app.resources.constants import (
 )
 from app.services.orient_trainer import OrientTrainer
 from app.services.pos_trainer import PosTrainer
+from app.services.tensorboard_process import TensorboardSupervisor
 from app.nn_models.nn_orient import ReOrientNet
 from app.nn_models.nn_position import PosNet
 from app.models.options import Option
@@ -84,26 +83,30 @@ class CommandLine(object):
         )
         parser.add_argument("--option", required=True)
         args = vars(parser.parse_args(sys.argv[2:]))
+        tensorboard_log_path = "logs/fit"
 
         try:
             train_args = CommonArgs.parse_obj(args)
             logger.info("Attempting to train ReOrient Net {option}".format(option=train_args.option))
+            logger.info("Starting Tensorboard server at http://localhost:6006")
             
+            tb_sup = TensorboardSupervisor(tensorboard_log_path)
             model = ReOrientNet()
             trainer = OrientTrainer(model)
             trainer.compile_model()
             trainer.train_model()
 
             logger.info("ReOrient Net training finished. Model weights have been saved.")
-
             logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
             
             model2 = PosNet()
-            trainer2 = PosTrainer(model)
+            trainer2 = PosTrainer(model2)
             trainer2.compile_model()
             trainer2.train_model()
 
-            logger.info("Pos Net training finished. Model weights have been saved.") 
+            logger.info("Pos Net training finished. Model weights have been saved.")
+            logger.info("Shutting down tensorboard server.")
+            tb_sup.finalize() 
 
         except ValueError as error:
             logger.error(str(error))

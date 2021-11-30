@@ -2,8 +2,9 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import random
+import datetime
 
-from tensorflow.keras import Input, Model, layers
+from tensorflow.keras import Model, layers
 from typing import Generator
 
 from app.resources.constants import (
@@ -13,12 +14,13 @@ from app.resources.constants import (
 from app.core.config import REORIENT_NET_EPOCHS
 from app.nn_models.nn_orient_loss import ReOrientLoss
 
-from pprint import pprint
 
 class OrientTrainer(object):
 
     def __init__(self, model: Model):
         self.model = model
+
+
 
     def _generate_training_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
         """generate_training_samples takes a matrix and separates into 
@@ -90,8 +92,17 @@ class OrientTrainer(object):
         steps = len(df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
         
         generator = self._generate_training_samples(matrix)
+
+        log_dir = "logs/fit/orient" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
         
-        self.model.fit(generator, epochs=REORIENT_NET_EPOCHS, verbose=2, steps_per_epoch=steps)
+        self.model.fit(
+            generator, 
+            epochs=REORIENT_NET_EPOCHS, 
+            verbose=1, 
+            steps_per_epoch=steps,
+            callbacks=[tensorboard_callback]
+        )
 
     def display_model(self) -> str:
         """display_model will return the model's summary. 

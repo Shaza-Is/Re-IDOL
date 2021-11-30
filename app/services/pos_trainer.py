@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import random
 
-from tensorflow.keras import Input, Model, layers
+from tensorflow.keras import Model
 from typing import Generator
 
 
@@ -16,7 +16,7 @@ from app.core.config import POS_NET_EPOCHS
 
 class PosTrainer(object):
 
-    def __init__(self, model):
+    def __init__(self, model: Model):
         self.model = model
 
     def _generate_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
@@ -45,9 +45,9 @@ class PosTrainer(object):
         """compile_model compiles the tensorflow model
         """
         self.model.compile(
-            optimizer = POSNET_OPTIMIZER,
-            loss = POSNET_LOSS,
-            metrics = [POSNET_METRICS]
+            optimizer = POS_NET_OPTIMIZER,
+            loss = POS_NET_LOSS,
+            metrics = [POS_NET_METRICS]
         )
 
     
@@ -62,15 +62,16 @@ class PosTrainer(object):
             "processedPosX", "processedPosY"
         ]].to_numpy()
 
-        matrix = np.hstack([np.random.rand(matrix.shape[0], 6), pos_data])
+        matrix = np.hstack([np.random.rand(pos_data.shape[0], 6), pos_data])
         generator = self._generate_samples(matrix)
         
         steps = len(pos_data)
 
-        self.model.fit(generator, epochs=POSNET, verbos=2, steps_per_epoch=steps)
+        self.model.fit(generator, epochs=POS_NET_EPOCHS, verbose=1, steps_per_epoch=steps)
 
     def display_model(self) -> str:
         return self.model.summary()
 
     def evaluate_model(self) -> None:
+        pass
 
