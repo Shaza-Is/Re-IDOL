@@ -3,6 +3,7 @@ pyarrow
 pandas
 jupyter
 tensorflow-gpu
+tensorflow-graphics-gpu
 tensorboard
 deepdiff
 python-dotenv
