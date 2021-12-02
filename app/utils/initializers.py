@@ -36,17 +36,6 @@ def get_files(option: IntEnum) -> List[str]:
         feather_files = feather_files - train_files
         return feather_files
 
-def create_csv(df: DataFrame, file_path: str) -> None:
-    """create_csv creates a csv file from a DataFrame and 
-    a filepath that is provided as an argument
-
-    Args:
-        df (DataFrame): a pandas DataFrame
-        file_path (str): a string file path that points to some directory
-    """
-    df.to_csv(file_path)
-
-
 def create_data(files: List[str]) -> DataFrame:
     """create_data creates the training data by 
     taking all the feather files available, converting them 
@@ -73,29 +62,7 @@ def create_data(files: List[str]) -> DataFrame:
         dfs.append(df)
     
     df2 = pd.concat(dfs, ignore_index=True)
-    return df2
-
-
-def create_test_data(files: List[str]) -> List[DataFrame]:
-    """create_test_data takes a list of files and converts 
-    them into DataFrame objects which are then stored into a list
-    which is then returned to be used individually in order to 
-    test trajectories. 
-
-    Args:
-        files (List[str]): a list of files
-
-    Returns:
-        List[DataFrame]: a list of DataFrames
-    """
-    dfs = []
-
-    for file in files:
-        df = pd.read_feather(file)
-        dfs.append(df)
-
-    return dfs
-
+    return df2 
 
 def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
     """apply_minmax_scaling receives a matrix with magnetometer data
@@ -125,5 +92,33 @@ def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
         joblib.dump(scaler, file_path)
         return results
 
+
+def get_latest_checkpoint(model: str, option: int) -> str:
+    checkpoints_path = f"saves/{model}/checkpoints_{model}_building{option}"
+    latest_checkpoint = ""
+
+
+    if not os.path.exists(checkpoints_path):
+        os.mkdir(checkpoints_path)
+        return latest_checkpoint
     
+    checkpoints = glob(f"{checkpoints_path}/*.hdf5")
+
+    if checkpoints:
+        latest_checkpoint = checkpoints[-1]
+    
+    return latest_checkpoint
+
+
+def initialize_data(option: IntEnum) -> DataFrame:
+    """initialize_data will return a DataFrame with all the 
+    data present for one building.  
+    """
+
+    files = get_files(option)
+    df = create_data(files=files)
+
+    return df
+
+
     

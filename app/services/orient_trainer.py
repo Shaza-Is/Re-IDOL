@@ -4,21 +4,24 @@ import pandas as pd
 import random
 import datetime
 
+from enum import IntEnum
 from tensorflow.keras import Model, layers
 from typing import Generator
 
 from app.resources.constants import (
     REORIENT_OPTIMIZER, 
-    REORIENT_METRICS
-)
+    REORIENT_METRICS,
+)   
 from app.core.config import REORIENT_NET_EPOCHS
 from app.nn_models.nn_orient_loss import ReOrientLoss
 
 
 class OrientTrainer(object):
 
-    def __init__(self, model: Model):
+    def __init__(self, building_num: int, model: Model, df: pd.DataFrame):
+        self.building_num = int(building_num)
         self.model = model
+        self.df = df
 
 
 
@@ -64,9 +67,13 @@ class OrientTrainer(object):
                     current_batch_number = 0              
                     yield([xa_batch, xg_batch, xm_batch],[y_batch])
     
-    def compile_model(self) -> None:
+    def compile_model(self, latest_checkpoint: str = "") -> None:
         """compile_model compiles the tensorflow model
         """
+
+        if latest_checkpoint:
+            self.model = tf.keras.models.load_model(latest_checkpoint, compile = False)
+
         self.model.compile(
             optimizer = REORIENT_OPTIMIZER,
             loss = ReOrientLoss(),
@@ -80,28 +87,36 @@ class OrientTrainer(object):
         seed = 10
         random.seed(seed)
         np.random.seed(seed)
+    
 
-        df = pd.read_csv("datasets/csvs/train.csv")
-        matrix = df[[
+        matrix = self.df[[
             "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
             "iphoneGyroX", "iphoneGyroY", "iphoneGyroZ",
             "iphoneMagX", "iphoneMagY", "iphoneMagZ",
             "orientX", "orientY", "orientZ", "orientW"
         ]].to_numpy()
 
-        steps = len(df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
+        steps = len(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
         
         generator = self._generate_training_samples(matrix)
 
-        log_dir = "logs/fit/orient" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+        log_dir = "logs/fit/orient{timestamp}".format(timestamp=timestamp)
+        checkpoint = """saves/orient/checkpoints_orient_building{building_num}/
+            orient{timestamp}.hdf5""".format(building_num=self.building_num, timestamp=timestamp)
+
+
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        
+        checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint)
+
+
         self.model.fit(
             generator, 
             epochs=REORIENT_NET_EPOCHS, 
             verbose=1, 
             steps_per_epoch=steps,
-            callbacks=[tensorboard_callback]
+            callbacks=[checkpoint_callback, tensorboard_callback]
         )
 
     def display_model(self) -> str:

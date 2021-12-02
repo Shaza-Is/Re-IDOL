@@ -1,4 +1,4 @@
-from tensorflow.keras import Model, Input, layers
+from tensorflow.keras import Sequential, Model, Input, layers
 
 from app.core.config import (
     REORIENT_NET_LSTM_1, 
@@ -11,11 +11,6 @@ from app.core.config import (
     REORIENT_NET_OUTPUT_2,
     REORIENT_NET_BATCH_SIZE,
     REORIENT_DENSE_ACTIVATION
-)
-from app.resources.constants import (
-    REORIENT_INPUT_SIZE_COLS, 
-    REORIENT_INPUT_SIZE_ROWS, 
-    REORIENT_OUTPUT_LAYER_SIZE
 )
 
 class ReOrientNet(Model):

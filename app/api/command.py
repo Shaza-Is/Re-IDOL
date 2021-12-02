@@ -7,7 +7,6 @@ from loguru import logger
 from app.resources.constants import (
     COMMAND_LINE_OPTIONS, 
     COMMAND_LINE_DESCRIPTION, 
-    CMD_PREPROCESS_DESCRIPTION, 
     CMD_TRAIN_DESCRIPTION,
     CMD_TEST_DESCRIPTION
 )
@@ -18,7 +17,7 @@ from app.nn_models.nn_orient import ReOrientNet
 from app.nn_models.nn_position import PosNet
 from app.models.options import Option
 from app.models.cmd_args import CommonArgs 
-from app.utils.initializers import get_files, create_data, create_csv, create_test_data
+from app.utils.initializers import initialize_data, get_latest_checkpoint
 
 class CommandLine(object):
     """This is the command line interface 
@@ -45,31 +44,6 @@ class CommandLine(object):
         
         getattr(self, args.command)()
 
-    def preprocess(self):
-        """Preprocess will create a csv file for training purposes
-        """
-        
-        logger.info("Running training set initializers...")
-
-        parser = argparse.ArgumentParser(
-            description = CMD_PREPROCESS_DESCRIPTION,
-        )
-
-        vars(parser.parse_args(sys.argv[2:]))
-        logger.info("Creating train csv...")
-
-        train_file_path = "datasets/csvs/train.csv"
-
-        if not os.path.exists(train_file_path):
-            option = Option.TRAIN
-            file_path = "datasets/csvs/train.csv"
-
-            files = get_files(option)
-            df = create_data(files=files)
-            create_csv(df, file_path)
-
-        logger.info("Train file created.")
-
     def train(self):
         """Train is used to perform training with one of 
         the neural networks. There are three options to use here: 
@@ -89,24 +63,28 @@ class CommandLine(object):
             train_args = CommonArgs.parse_obj(args)
             logger.info("Attempting to train ReOrient Net {option}".format(option=train_args.option))
             logger.info("Starting Tensorboard server at http://localhost:6006")
-            
+
+            df = initialize_data(train_args.option)
+
+            latest_checkpoint = get_latest_checkpoint("orient", train_args.option)
             tb_sup = TensorboardSupervisor(tensorboard_log_path)
             model = ReOrientNet()
-            trainer = OrientTrainer(model)
-            trainer.compile_model()
+            trainer = OrientTrainer(train_args.option, model, df)
+            trainer.compile_model(latest_checkpoint=latest_checkpoint)
             trainer.train_model()
+            trainer.display_model()
 
-            logger.info("ReOrient Net training finished. Model weights have been saved.")
-            logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
+            # logger.info("ReOrient Net training finished. Model weights have been saved.")
+            # logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
             
-            model2 = PosNet()
-            trainer2 = PosTrainer(model2)
-            trainer2.compile_model()
-            trainer2.train_model()
+            # model2 = PosNet()
+            # trainer2 = PosTrainer(model2)
+            # trainer2.compile_model()
+            # trainer2.train_model()
 
-            logger.info("Pos Net training finished. Model weights have been saved.")
-            logger.info("Shutting down tensorboard server.")
-            tb_sup.finalize() 
+            # logger.info("Pos Net training finished. Model weights have been saved.")
+            # logger.info("Shutting down tensorboard server.")
+            # tb_sup.finalize() 
 
         except ValueError as error:
             logger.error(str(error))
