@@ -13,7 +13,7 @@ from app.models.options import Option
 
 from typing import List
     
-def get_files(option: IntEnum) -> List[str]: 
+def get_files(option: IntEnum, is_training: bool = False) -> List[str]: 
     """get_files retrieves all the file paths related 
     to particular folder options. 
     1 = Building 1
@@ -28,11 +28,12 @@ def get_files(option: IntEnum) -> List[str]:
         List[str]: a list of file paths. 
     """
     train_files = set(glob("datasets/building1/train/*.feather"))
+    trajectory = "known" if is_training else "unknown"
 
     if option == Option.TRAIN: 
         return train_files
     else: 
-        feather_files = set(glob(f"datasets/building{int(option)}/*/*.feather"))
+        feather_files = set(glob(f"datasets/building{int(option)}/{trajectory}/*.feather"))
         feather_files = feather_files - train_files
         return feather_files
 

@@ -4,9 +4,9 @@ import pandas as pd
 import random
 import datetime
 
-from enum import IntEnum
 from tensorflow.keras import Model, layers
 from typing import Generator
+from pprint import pprint
 
 from app.resources.constants import (
     REORIENT_OPTIMIZER, 
@@ -97,6 +97,9 @@ class OrientTrainer(object):
         ]].to_numpy()
 
         steps = len(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
+
+
+        pprint(f"STEPS: {steps}")
         
         generator = self._generate_training_samples(matrix)
 
