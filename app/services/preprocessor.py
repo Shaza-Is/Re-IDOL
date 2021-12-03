@@ -91,6 +91,12 @@ class PreProcessor():
             "iphoneGyroX", "iphoneGyroY", "iphoneGyroZ",
             "orientW", "orientX", "orientY", "orientZ"
         ]]
+        df["iphoneAccX"] = -1* df["iphoneAccX"]
+        df["iphoneAccY"] = -1* df["iphoneAccY"]
+        df["iphoneGyroX"] = -1*df["iphoneGyroX"]
+        df["iphoneGyroY"] = -1*df["iphoneGyroY"]
+        df["iphoneMagX"] = -1* df["iphoneMagX"]
+        df["iphoneMagY"] = -1* df["iphoneMagY"]
 
         X = df[[
                 "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
