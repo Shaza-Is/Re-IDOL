@@ -274,3 +274,6 @@ datasets/
 
 # vscode
 .vscode/
+
+# tensorboard logs
+logs/
