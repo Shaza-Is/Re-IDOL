@@ -7,9 +7,7 @@ import datetime
 from tensorflow.keras import Input, Model
 from typing import Generator
 
-from app.resources.constants import (
-    REORIENT_METRICS,
-)   
+
 from app.core.config import REORIENT_NET_EPOCHS, REORIENT_NET_LEARNING_RATE
 from app.nn_models.nn_orient_loss import ReOrientLoss
 
@@ -54,9 +52,6 @@ class OrientTrainer(object):
             xg_batch = np.zeros((batch_size,100,3))
             xm_batch = np.zeros((batch_size,100,3))
             y_theta_batch = np.zeros((batch_size,4))
-            y_sigma_batch = np.finfo(np.float32).eps* np.ones((batch_size,6)) ## To remove
-            y_batch = np.concatenate((y_theta_batch, y_sigma_batch), axis=1)
-
             
             current_batch_number = 0
             for index in range(len(orient)):
@@ -72,7 +67,7 @@ class OrientTrainer(object):
                 if current_batch_number >= batch_size:
                     current_batch_number = 0
                     x = np.concatenate((xa_batch, xg_batch, xm_batch), axis=1)              
-                    yield([x],[y_batch])
+                    yield([x],[y_theta_batch])
     
     def compile_model(self, latest_checkpoint: str = "") -> None:
         """compile_model compiles the tensorflow model
@@ -86,8 +81,7 @@ class OrientTrainer(object):
 
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
-            loss = ReOrientLoss(),
-            metrics = [REORIENT_METRICS]
+            loss = ReOrientLoss()
         )
 
     def train_model(self) -> None:

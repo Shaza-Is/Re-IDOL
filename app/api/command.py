@@ -72,7 +72,7 @@ class CommandLine(object):
             trainer = OrientTrainer(train_args.option, layers, df, is_reduced=True)
             trainer.compile_model(latest_checkpoint=latest_checkpoint)
             trainer.display_model()
-            trainer.train_model()
+            # trainer.train_model()
 
             # logger.info("ReOrient Net training finished. Model weights have been saved.")
             # logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))

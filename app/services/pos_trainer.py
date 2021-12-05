@@ -10,7 +10,6 @@ from typing import Generator
 from app.resources.constants import (
     POS_NET_OPTIMIZER,
     POS_NET_LOSS,
-    POS_NET_METRICS,
 )
 from app.core.config import POS_NET_EPOCHS
 
@@ -46,8 +45,7 @@ class PosTrainer(object):
         """
         self.model.compile(
             optimizer = POS_NET_OPTIMIZER,
-            loss = POS_NET_LOSS,
-            metrics = [POS_NET_METRICS]
+            loss = POS_NET_LOSS
         )
 
     
