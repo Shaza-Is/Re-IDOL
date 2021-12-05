@@ -1,4 +1,4 @@
-from tensorflow.keras import Sequential, Model, Input, layers
+from tensorflow.keras import Model, Input, layers
 
 from app.core.config import (
     REORIENT_NET_LSTM_1, 
@@ -17,9 +17,11 @@ class ReOrientNet(Model):
     def __init__(self):
         super(ReOrientNet, self).__init__()
 
-        self.lstm_layer_1 = layers.LSTM(REORIENT_NET_LSTM_1, return_sequences=True, name="ReOrient_LSTM_1")
-        self.lstm_layer_2 = layers.LSTM(REORIENT_NET_LSTM_2, return_sequences=False, name="ReOrient_LSTM_2")
-        self.dense_layer_1 = layers.Dense(units=REORIENT_NET_DENSE_1, 
+        self.lstm_layer_1 = layers.LSTM(REORIENT_NET_LSTM_1,  kernel_initializer = "glorot_uniform", 
+            recurrent_initializer = "orthogonal", return_sequences=True, name="ReOrient_LSTM_1")
+        self.lstm_layer_2 = layers.LSTM(REORIENT_NET_LSTM_2, kernel_initializer = "glorot_uniform", 
+            recurrent_initializer = "orthogonal", return_sequences=False, name="ReOrient_LSTM_2")
+        self.dense_layer_1 = layers.Dense(units=REORIENT_NET_DENSE_1,
             activation=REORIENT_DENSE_ACTIVATION, name="ReOrient_Dense_1")
         self.dense_layer_2 = layers.Dense(units=REORIENT_NET_DENSE_2, 
             activation=REORIENT_DENSE_ACTIVATION, name="ReOrient_Dense_2")
@@ -32,9 +34,8 @@ class ReOrientNet(Model):
         self.output_layer_2 = layers.Dense(units=REORIENT_NET_OUTPUT_2, name="ReOrient_Cov_Matrix")
 
     def call(self, inputs: Input, is_training: bool = False):
-        x = layers.Concatenate()([inputs[0], inputs[1], inputs[2]])
 
-        x = self.lstm_layer_1(x)
+        x = self.lstm_layer_1(inputs)
         x = self.lstm_layer_2(x)
 
         x = self.dense_layer_1(x)

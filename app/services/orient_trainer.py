@@ -4,25 +4,27 @@ import pandas as pd
 import random
 import datetime
 
-from tensorflow.keras import Model, layers
+from tensorflow.keras import Input, Model
 from typing import Generator
-from pprint import pprint
 
 from app.resources.constants import (
-    REORIENT_OPTIMIZER, 
     REORIENT_METRICS,
 )   
-from app.core.config import REORIENT_NET_EPOCHS
+from app.core.config import REORIENT_NET_EPOCHS, REORIENT_NET_LEARNING_RATE
 from app.nn_models.nn_orient_loss import ReOrientLoss
 
 
 class OrientTrainer(object):
 
-    def __init__(self, building_num: int, model: Model, df: pd.DataFrame):
+    def __init__(self, building_num: int, model: Model, df: pd.DataFrame, is_reduced: bool = False):
         self.building_num = int(building_num)
         self.model = model
-        self.df = df
 
+        if is_reduced: 
+            length = int(df.shape[0] / 32)
+            self.df = df[:length]
+        else: 
+            self.df = df
 
 
     def _generate_training_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
@@ -54,6 +56,7 @@ class OrientTrainer(object):
             y_theta_batch = np.zeros((batch_size,4))
             y_sigma_batch = np.finfo(np.float32).eps* np.ones((batch_size,6)) ## To remove
             y_batch = np.concatenate((y_theta_batch, y_sigma_batch), axis=1)
+
             
             current_batch_number = 0
             for index in range(len(orient)):
@@ -62,10 +65,14 @@ class OrientTrainer(object):
                 xg_batch[current_batch_number,:,:] = gyro[index,:]
                 xm_batch[current_batch_number,:,:] = mag[index,:]
                 y_theta_batch[current_batch_number,:4] = orient[index,:]
+                
+
                 current_batch_number += 1
+
                 if current_batch_number >= batch_size:
-                    current_batch_number = 0              
-                    yield([xa_batch, xg_batch, xm_batch],[y_batch])
+                    current_batch_number = 0
+                    x = np.concatenate((xa_batch, xg_batch, xm_batch), axis=1)              
+                    yield([x],[y_batch])
     
     def compile_model(self, latest_checkpoint: str = "") -> None:
         """compile_model compiles the tensorflow model
@@ -73,9 +80,12 @@ class OrientTrainer(object):
 
         if latest_checkpoint:
             self.model = tf.keras.models.load_model(latest_checkpoint, compile = False)
+        else: 
+            inputs = Input((100, 9), dtype="float32")
+            self.model = Model(inputs, self.model(inputs))
 
         self.model.compile(
-            optimizer = REORIENT_OPTIMIZER,
+            optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
             loss = ReOrientLoss(),
             metrics = [REORIENT_METRICS]
         )
@@ -84,9 +94,10 @@ class OrientTrainer(object):
         """train_model generates the training samples and then
         trains the models in batches
         """
-        seed = 10
+        seed=100
         random.seed(seed)
         np.random.seed(seed)
+        tf.random.set_seed(seed)
     
 
         matrix = self.df[[
@@ -97,9 +108,6 @@ class OrientTrainer(object):
         ]].to_numpy()
 
         steps = len(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
-
-
-        pprint(f"STEPS: {steps}")
         
         generator = self._generate_training_samples(matrix)
 

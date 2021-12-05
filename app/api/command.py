@@ -61,18 +61,18 @@ class CommandLine(object):
 
         try:
             train_args = CommonArgs.parse_obj(args)
-            logger.info("Attempting to train ReOrient Net {option}".format(option=train_args.option))
+            logger.info("Attempting to train ReOrient Net on Building {option}".format(option=train_args.option))
             logger.info("Starting Tensorboard server at http://localhost:6006")
 
             df = initialize_data(train_args.option)
 
             latest_checkpoint = get_latest_checkpoint("orient", train_args.option)
             tb_sup = TensorboardSupervisor(tensorboard_log_path)
-            model = ReOrientNet()
-            trainer = OrientTrainer(train_args.option, model, df)
+            layers = ReOrientNet()
+            trainer = OrientTrainer(train_args.option, layers, df, is_reduced=True)
             trainer.compile_model(latest_checkpoint=latest_checkpoint)
-            trainer.train_model()
             trainer.display_model()
+            trainer.train_model()
 
             # logger.info("ReOrient Net training finished. Model weights have been saved.")
             # logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
@@ -84,7 +84,7 @@ class CommandLine(object):
 
             # logger.info("Pos Net training finished. Model weights have been saved.")
             # logger.info("Shutting down tensorboard server.")
-            # tb_sup.finalize() 
+            tb_sup.finalize() 
 
         except ValueError as error:
             logger.error(str(error))
@@ -107,7 +107,7 @@ class CommandLine(object):
 
         try:
             test_args = CommonArgs.parse_obj(args)
-            logger.info("Testing neural network {option}".format(option=test_args.option))
+            logger.info("Testing neural network on building {option}".format(option=test_args.option))
         except ValueError as error:
             print(str(error))
             exit(1)

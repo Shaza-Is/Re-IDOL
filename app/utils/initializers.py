@@ -63,6 +63,14 @@ def create_data(files: List[str]) -> DataFrame:
         dfs.append(df)
     
     df2 = pd.concat(dfs, ignore_index=True)
+
+    df2["iphoneAccX"] = -1*df2["iphoneAccX"]
+    df2["iphoneAccY"] = -1*df2["iphoneAccY"]
+    df2["iphoneGyroX"] = -1*df2["iphoneGyroX"]
+    df2["iphoneGyroY"] = -1*df2["iphoneGyroY"]
+    df2["iphoneMagX"] = -1*df2["iphoneMagX"]
+    df2["iphoneMagY"] = -1*df2["iphoneMagY"]
+    
     return df2 
 
 def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
