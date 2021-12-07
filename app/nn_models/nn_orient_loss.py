@@ -98,3 +98,35 @@ def quat_diff(y_true, y_pred):
   return tf.cast(d_without_nans, tf.float32)
 
 quat_metric = tf.keras.metrics.MeanMetricWrapper(fn=quat_diff, name='metric_quat_diff')
+
+def quaternion_from_output(y_pred):
+  q = tf.slice(y_pred,
+                    begin=[0,0],
+                    size=[-1,4])  
+  return q
+def sig_from_output(y_pred):
+    s_00 = tf.math.exp(tf.reshape(tf.slice(y_pred,  
+           begin=[0,4],
+           size=[-1,1]), [-1]))
+    s_11 = tf.math.exp(tf.reshape(tf.slice(y_pred,  
+           begin=[0,5],  
+           size=[-1,1]), [-1]))
+    s_22 = tf.math.exp(tf.reshape(tf.slice(y_pred, 
+           begin=[0,6],
+           size=[-1,1]), [-1]))
+    s_01 = tf.math.multiply(tf.reshape(tf.slice(y_pred,
+           begin=[0,7],  
+           size=[-1,1]), [-1]), tf.math.sqrt(tf.math.multiply(s_00, s_11)))
+    s_02 = tf.math.multiply(tf.reshape(tf.slice(y_pred, 
+           begin=[0,8],    
+           size=[-1,1]), [-1]), tf.math.sqrt(tf.math.multiply(s_00, s_22)))
+    s_12 = tf.math.multiply(tf.reshape(tf.slice(y_pred,
+           begin=[0,9],  
+           size=[-1,1]), [-1]), tf.math.sqrt(tf.math.multiply(s_11, s_22)))
+
+           
+    sig0 = tf.stack([s_00, s_01, s_02], axis=1)
+    sig1 = tf.stack([s_01, s_11, s_12], axis=1)
+    sig2 = tf.stack([s_02, s_12, s_22], axis=1)
+    sig = tf.stack([sig0, sig1, sig2], axis=2)
+    return sig
