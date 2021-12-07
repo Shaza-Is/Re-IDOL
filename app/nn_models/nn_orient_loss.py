@@ -1,5 +1,8 @@
 import tensorflow as tf
 import tensorflow_graphics.geometry.transformation as tfg
+gpu_devices = tf.config.experimental.list_physical_devices("GPU")
+for device in gpu_devices:
+    tf.config.experimental.set_memory_growth(device, True)
 
 class ReOrientLoss(tf.keras.losses.Loss):
   def call(self, y_true, y_pred):
