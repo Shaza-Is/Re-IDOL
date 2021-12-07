@@ -76,3 +76,20 @@ class ReOrientLoss(tf.keras.losses.Loss):
 class MyLossP(tf.keras.losses.Loss):
   def call(self, y_true, y_pred):
     return tf.sqrt(tf.reduce_mean((y_pred - y_true)**2, axis=-1))
+
+def quat_diff(y_true, y_pred):
+  q = tf.slice(y_true,
+                    begin=[0,0],
+                    size=[-1,4])  
+
+
+
+  q_est = tf.slice(y_pred,
+                    begin=[0,0],
+                    size=[-1,4])  
+  d = tfg.quaternion.relative_angle(q_est, q)
+  # Replace all NaN values with 0.0.
+  d_without_nans = tf.where(tf.math.is_nan(d), tf.zeros_like(d), d)
+  return tf.cast(d_without_nans, tf.float32)
+
+quat_metric = tf.keras.metrics.MeanMetricWrapper(fn=quat_diff, name='metric_quat_diff')

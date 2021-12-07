@@ -22,7 +22,10 @@ from app.core.config import (
     REORIENT_DENSE_ACTIVATION
 )
 from app.nn_models.nn_orient_loss import ReOrientLoss
+import app.nn_models.nn_orient_loss
 from app.nn_models.nn_orient import build_reorient
+
+
 
 class OrientTrainer(object):
 
@@ -96,6 +99,7 @@ class OrientTrainer(object):
 
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
+            metrics= [app.nn_models.nn_orient_loss.quat_metric],
             loss = ReOrientLoss()
         )
 
