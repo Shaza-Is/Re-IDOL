@@ -13,8 +13,6 @@ from app.resources.constants import (
 from app.services.orient_trainer import OrientTrainer
 from app.services.pos_trainer import PosTrainer
 from app.services.tensorboard_process import TensorboardSupervisor
-from app.nn_models.nn_orient import ReOrientNet
-from app.nn_models.nn_position import PosNet
 from app.models.options import Option
 from app.models.cmd_args import CommonArgs 
 from app.utils.initializers import initialize_data, get_latest_checkpoint
@@ -58,6 +56,8 @@ class CommandLine(object):
         parser.add_argument("--option", required=True)
         args = vars(parser.parse_args(sys.argv[2:]))
         tensorboard_log_path = "logs/fit"
+        tb_sup = TensorboardSupervisor(tensorboard_log_path)
+
 
         try:
             train_args = CommonArgs.parse_obj(args)
@@ -67,9 +67,7 @@ class CommandLine(object):
             df = initialize_data(train_args.option)
 
             latest_checkpoint = get_latest_checkpoint("orient", train_args.option)
-            tb_sup = TensorboardSupervisor(tensorboard_log_path)
-            layers = ReOrientNet()
-            trainer = OrientTrainer(train_args.option, layers, df, is_reduced=True)
+            trainer = OrientTrainer(train_args.option, df, is_reduced=True)
             trainer.compile_model(latest_checkpoint=latest_checkpoint)
             trainer.display_model()
             trainer.train_model()
@@ -88,11 +86,12 @@ class CommandLine(object):
 
         except ValueError as error:
             logger.error(str(error))
+            tb_sup.finalize()
             exit(1)
 
 
     def test(self):
-        """Test is used to perform testing with one of the neural networks
+        """test is used to perform testing with one of the neural networks
         for that was trained for each building. There are three options to use here: 
         1 = Building 1
         2 = Building 2
@@ -104,13 +103,25 @@ class CommandLine(object):
         )
         parser.add_argument("--option", required=True)
         args = vars(parser.parse_args(sys.argv[2:]))
+        tensorboard_log_path = "logs/evaluate"
+        tb_sup = TensorboardSupervisor(tensorboard_log_path)
 
         try:
             test_args = CommonArgs.parse_obj(args)
-            logger.info("Testing neural network on building {option}".format(option=test_args.option))
-        except ValueError as error:
-            print(str(error))
-            exit(1)
+            
+            if not os.path.exists("saves/orient/"):
+                logger.error("No saved models, cannot test model. Please train model before calling test function.")
+                exit(1)
 
-    def predict(self):
-        pass
+            logger.info("Testing neural network on building {option}".format(option=test_args.option))
+
+            df = initialize_data(test_args.option, is_training = False)
+
+            trainer = OrientTrainer(test_args.option, df, is_reduced = True)
+            trainer.evaluate_model()
+            tb_sup.finalize()
+
+        except ValueError as error:
+            logger.error(str(error))
+            tb_sup.finalize()
+            exit(1)

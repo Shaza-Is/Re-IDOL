@@ -1,25 +1,36 @@
 import tensorflow as tf
 import numpy as np
-import pandas as pd
 import random
+import os
 import datetime
 
-from tensorflow.keras import Input, Model
+from tensorflow.keras import Input, Sequential, layers
 from typing import Generator
+from pandas import DataFrame
 
-
-from app.core.config import REORIENT_NET_EPOCHS, REORIENT_NET_LEARNING_RATE
+from app.core.config import (
+    REORIENT_NET_EPOCHS, 
+    REORIENT_NET_LEARNING_RATE,
+    REORIENT_NET_LSTM_1, 
+    REORIENT_NET_LSTM_2, 
+    REORIENT_NET_DENSE_1,
+    REORIENT_NET_DENSE_2,
+    REORIENT_NET_DENSE_3,
+    REORIENT_NET_DENSE_4,
+    REORIENT_NET_OUTPUT_1,
+    REORIENT_NET_OUTPUT_2,
+    REORIENT_DENSE_ACTIVATION
+)
 from app.nn_models.nn_orient_loss import ReOrientLoss
-
+from app.nn_models.nn_orient import build_reorient
 
 class OrientTrainer(object):
 
-    def __init__(self, building_num: int, model: Model, df: pd.DataFrame, is_reduced: bool = False):
+    def __init__(self, building_num: int, df: DataFrame, is_reduced: bool = False):
         self.building_num = int(building_num)
-        self.model = model
 
         if is_reduced: 
-            length = int(df.shape[0] / 32)
+            length = int(df.shape[0] / 128)
             self.df = df[:length]
         else: 
             self.df = df
@@ -65,9 +76,9 @@ class OrientTrainer(object):
                 current_batch_number += 1
 
                 if current_batch_number >= batch_size:
-                    current_batch_number = 0
-                    x = np.concatenate((xa_batch, xg_batch, xm_batch), axis=1)              
-                    yield([x],[y_theta_batch])
+                    current_batch_number = 0             
+                    yield([xa_batch, xg_batch, xm_batch],[y_theta_batch])
+        
     
     def compile_model(self, latest_checkpoint: str = "") -> None:
         """compile_model compiles the tensorflow model
@@ -75,9 +86,13 @@ class OrientTrainer(object):
 
         if latest_checkpoint:
             self.model = tf.keras.models.load_model(latest_checkpoint, compile = False)
-        else: 
-            inputs = Input((100, 9), dtype="float32")
-            self.model = Model(inputs, self.model(inputs))
+        else:
+            input1 = Input((100, 3), dtype="float32")
+            input2 = Input((100, 3), dtype="float32")
+            input3 = Input((100, 3), dtype="float32")
+
+            inputs = [input1, input2, input3]
+            self.model = self.model = build_reorient(inputs)
 
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
@@ -93,6 +108,10 @@ class OrientTrainer(object):
         np.random.seed(seed)
         tf.random.set_seed(seed)
     
+        save_file_path = f"saves/orient/building{self.building_num}"
+
+        if not os.path.exists(save_file_path):
+            os.mkdir(save_file_path)
 
         matrix = self.df[[
             "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
@@ -121,8 +140,31 @@ class OrientTrainer(object):
             epochs=REORIENT_NET_EPOCHS, 
             verbose=1, 
             steps_per_epoch=steps,
-            callbacks=[checkpoint_callback, tensorboard_callback]
+            callbacks=[tensorboard_callback, checkpoint_callback]
         )
+
+        self.model.save(save_file_path)
+
+    def evaluate_model(self) -> None: 
+        self.model = tf.keras.models.load_model("saves/orient/building1", compile=False)
+        self.model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
+            loss = ReOrientLoss())
+        self.display_model()
+
+        matrix = self.df[[
+            "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
+            "iphoneGyroX", "iphoneGyroY", "iphoneGyroZ",
+            "iphoneMagX", "iphoneMagY", "iphoneMagZ",
+            "orientX", "orientY", "orientZ", "orientW"
+        ]].to_numpy()
+
+        steps = len(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
+        generator = self._generate_training_samples(matrix)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = "logs/evaluate/orient{timestamp}".format(timestamp=timestamp)
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+        self.model.evaluate(generator, steps=steps, verbose=1, callbacks=[tensorboard_callback])
 
     def display_model(self) -> str:
         """display_model will return the model's summary. 

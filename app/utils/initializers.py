@@ -13,7 +13,7 @@ from app.models.options import Option
 
 from typing import List
     
-def get_files(option: IntEnum, is_training: bool = False) -> List[str]: 
+def get_files(option: IntEnum, is_training: bool = True) -> List[str]: 
     """get_files retrieves all the file paths related 
     to particular folder options. 
     1 = Building 1
@@ -119,12 +119,18 @@ def get_latest_checkpoint(model: str, option: int) -> str:
     return latest_checkpoint
 
 
-def initialize_data(option: IntEnum) -> DataFrame:
+def initialize_data(option: IntEnum, is_training: bool = False) -> DataFrame:
     """initialize_data will return a DataFrame with all the 
     data present for one building.  
     """
+    files = ""
 
-    files = get_files(option)
+    if is_training: 
+        files = get_files(option, is_training=is_training)
+    else: 
+        files = get_files(option)
+
+
     df = create_data(files=files)
 
     return df

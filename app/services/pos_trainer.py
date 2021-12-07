@@ -5,18 +5,19 @@ import random
 
 from tensorflow.keras import Model
 from typing import Generator
-
+from pandas import DataFrame
 
 from app.resources.constants import (
     POS_NET_OPTIMIZER,
     POS_NET_LOSS,
 )
 from app.core.config import POS_NET_EPOCHS
+from app.nn_models.nn_position import create_position
 
 class PosTrainer(object):
 
-    def __init__(self, model: Model):
-        self.model = model
+    def __init__(self, df: DataFrame):
+        self.df = df
 
     def _generate_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
         while True:
@@ -43,6 +44,8 @@ class PosTrainer(object):
     def compile_model(self) -> None:
         """compile_model compiles the tensorflow model
         """
+        self.model = create_position()
+
         self.model.compile(
             optimizer = POS_NET_OPTIMIZER,
             loss = POS_NET_LOSS
