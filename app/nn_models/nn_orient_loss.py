@@ -67,9 +67,14 @@ class ReOrientLoss(tf.keras.losses.Loss):
     m_ = tf.matmul(sig_inv, delta)
     m = tf.matmul(delta, m_, transpose_a=True)
 
-    l_s = tf.linalg.logdet(sig)
-    l = tf.math.scalar_mul(0.5, m)
+    #l_s = tf.linalg.logdet(sig)
+    #l = tf.math.scalar_mul(0.5, m)
 
+    l_s = tf.linalg.logdet(sig)
+    ls_without_nans = tf.where(tf.math.is_nan(l_s), tf.zeros_like(l_s), l_s)
+    l = tf.math.scalar_mul(0.5, m) + tf.math.abs(tf.math.scalar_mul(0.5, ls_without_nans)) 
+
+    l = tf.cast(l, tf.float32)
     return tf.reduce_mean(l)
 
 
