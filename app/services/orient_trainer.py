@@ -4,22 +4,13 @@ import random
 import os
 import datetime
 
-from tensorflow.keras import Input, Sequential, layers
+from tensorflow.keras import Input
 from typing import Generator
 from pandas import DataFrame
 
 from app.core.config import (
     REORIENT_NET_EPOCHS, 
-    REORIENT_NET_LEARNING_RATE,
-    REORIENT_NET_LSTM_1, 
-    REORIENT_NET_LSTM_2, 
-    REORIENT_NET_DENSE_1,
-    REORIENT_NET_DENSE_2,
-    REORIENT_NET_DENSE_3,
-    REORIENT_NET_DENSE_4,
-    REORIENT_NET_OUTPUT_1,
-    REORIENT_NET_OUTPUT_2,
-    REORIENT_DENSE_ACTIVATION
+    REORIENT_NET_LEARNING_RATE
 )
 from app.nn_models.nn_orient_loss import ReOrientLoss
 import app.nn_models.nn_orient_loss
