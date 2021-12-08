@@ -13,7 +13,7 @@ from app.core.config import (
     REORIENT_NET_EPOCHS, 
     REORIENT_NET_LEARNING_RATE
 )
-from app.nn_models.nn_orient_loss import ReOrientLoss, quat_metric
+from app.nn_models.nn_orient_loss import ReOrientLoss, quat_metric, MyLossRMSE
 from app.nn_models.nn_orient import build_reorient
 
 
@@ -144,7 +144,7 @@ class OrientTrainer(object):
     def evaluate_model(self) -> None: 
         self.model = tf.keras.models.load_model("saves/orient/building1", compile=False)
         self.model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
-            loss = ReOrientLoss())
+            loss = MyLossRMSE())
         self.display_model()
 
         matrix = self.df[[
