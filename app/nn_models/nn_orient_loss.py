@@ -78,9 +78,19 @@ class ReOrientLoss(tf.keras.losses.Loss):
     return tf.reduce_mean(l)
 
 
-class MyLossP(tf.keras.losses.Loss):
+class MyLossRMSE(tf.keras.losses.Loss):
   def call(self, y_true, y_pred):
-    return tf.sqrt(tf.reduce_mean((y_pred - y_true)**2, axis=-1))
+    y_true = tf.cast(y_true, y_pred.dtype)
+    
+    q = tf.slice(y_true,
+                    begin=[0,0],
+                    size=[-1,4])  
+
+    q_est = tf.slice(y_pred,
+                    begin=[0,0],
+                    size=[-1,4])  
+    return tf.sqrt(tf.reduce_mean((q_est - q)**2, axis=-1))
+
 
 def quat_diff(y_true, y_pred):
   q = tf.slice(y_true,
