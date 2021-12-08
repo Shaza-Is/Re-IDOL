@@ -14,9 +14,14 @@ from app.resources.constants import (
 )
 from app.core.config import (
     POS_NET_EPOCHS, 
-    POS_NET_LEARNING_RATE
+    POS_NET_LEARNING_RATE,
+    SEED
 )
 from app.nn_models.nn_position import build_position
+
+random.seed(SEED)
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
 class PosTrainer(object):
 
@@ -92,10 +97,6 @@ class PosTrainer(object):
         Args:
             initial_epoch (int, optional): [Epoch number to start model training]. Defaults to 0.
         """
-        seed = 13
-        random.seed(seed)
-        np.random.seed(seed)
-        tf.random.set_seed(seed)
 
         save_file_path = f"saves/pos/building{self.building_num}"
 

@@ -13,12 +13,17 @@ from tensorflow.python.keras import callbacks
 
 from app.core.config import (
     REORIENT_NET_EPOCHS, 
-    REORIENT_NET_LEARNING_RATE
+    REORIENT_NET_LEARNING_RATE,
+    SEED
 )
 from app.nn_models.nn_orient_loss import ReOrientLoss, quat_metric, MyLossRMSE
 from app.nn_models.nn_orient import build_reorient
 
 
+        
+random.seed(SEED)
+np.random.seed(SEED)
+tf.random.set_seed(SEED)
 
 class OrientTrainer(object):
 
@@ -106,10 +111,6 @@ class OrientTrainer(object):
         Args:
             initial_epoch (int, optional): [Epoch number to start model training]. Defaults to 0. 
         """
-        seed=13
-        random.seed(seed)
-        np.random.seed(seed)
-        tf.random.set_seed(seed)
     
         save_file_path = f"saves/orient/building{self.building_num}"
 
