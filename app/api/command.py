@@ -66,30 +66,34 @@ class CommandLine(object):
 
             df = initialize_data(train_args.option)
 
-            latest_checkpoint = get_latest_checkpoint("orient", train_args.option)
-            initial_epoch = 0
+            latest_checkpoint_orient = get_latest_checkpoint("orient", train_args.option)
+            initial_epoch_orient = 0 
 
-            if len(latest_checkpoint) > 0:
-
-                if latest_checkpoint[1] > 0: 
-                    initial_epoch = latest_checkpoint[1]
-            
+            if latest_checkpoint_orient and latest_checkpoint_orient[1] > 0: 
+                initial_epoch_orient = latest_checkpoint_orient[1]
 
             trainer = OrientTrainer(train_args.option, df, is_reduced=True)
-            trainer.compile_model(latest_checkpoint=latest_checkpoint)
+            trainer.compile_model(latest_checkpoint=latest_checkpoint_orient)
             trainer.display_model()
-            trainer.train_model(initial_epoch=initial_epoch)
+            trainer.train_model(initial_epoch=initial_epoch_orient)
+            results = trainer.predict()
 
-            # logger.info("ReOrient Net training finished. Model weights have been saved.")
-            # logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
+            logger.info("ReOrient Net training finished. Model has been saved.")
+            logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
             
-            # model2 = PosNet()
-            # trainer2 = PosTrainer(model2)
-            # trainer2.compile_model()
-            # trainer2.train_model()
+            latest_checkpoint_pos = get_latest_checkpoint("pos", train_args.option)
+            initial_epoch_pos = 0
 
-            # logger.info("Pos Net training finished. Model weights have been saved.")
-            # logger.info("Shutting down tensorboard server.")
+            if latest_checkpoint_pos and latest_checkpoint_pos[1] > 0: 
+                initial_epoch_pos = latest_checkpoint_pos[1]
+
+            trainer2 = PosTrainer(train_args.option, df, results, is_reduced=True)
+            trainer2.compile_model(latest_checkpoint=latest_checkpoint_pos)
+            trainer2.display_model()
+            trainer2.train_model(initial_epoch=initial_epoch_pos)
+
+            logger.info("Pos Net training finished. Model weights have been saved.")
+            logger.info("Shutting down tensorboard server.")
             tb_sup.finalize() 
 
         except ValueError as error:

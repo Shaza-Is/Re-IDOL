@@ -1,10 +1,9 @@
-import sys
+import os
 
 from dotenv import load_dotenv
 from app.api.command import CommandLine
-from typing import List
 
-def main(): 
+def main():
     CommandLine()
 
 

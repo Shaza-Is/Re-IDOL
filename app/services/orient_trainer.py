@@ -9,6 +9,8 @@ from typing import Generator, Tuple
 from pandas import DataFrame
 from string import Template
 
+from tensorflow.python.keras import callbacks
+
 from app.core.config import (
     REORIENT_NET_EPOCHS, 
     REORIENT_NET_LEARNING_RATE
@@ -75,7 +77,10 @@ class OrientTrainer(object):
         
     
     def compile_model(self, latest_checkpoint: Tuple[str, int, float, float]) -> None:
-        """compile_model compiles the tensorflow model
+        """[summary]
+
+        Args:
+            latest_checkpoint (Tuple[str, int, float, float]): [description]
         """
 
         if latest_checkpoint:
@@ -86,7 +91,7 @@ class OrientTrainer(object):
             input3 = Input((100, 3), dtype="float32")
 
             inputs = [input1, input2, input3]
-            self.model = self.model = build_reorient(inputs)
+            self.model = build_reorient(inputs)
 
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
@@ -96,9 +101,12 @@ class OrientTrainer(object):
 
     def train_model(self, initial_epoch=0) -> None:
         """train_model generates the training samples and then
-        trains the models in batches
+        trains the models in batches of 64
+
+        Args:
+            initial_epoch (int, optional): [Epoch number to start model training]. Defaults to 0. 
         """
-        seed=100
+        seed=13
         random.seed(seed)
         np.random.seed(seed)
         tf.random.set_seed(seed)
@@ -161,6 +169,23 @@ class OrientTrainer(object):
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
         self.model.evaluate(generator, steps=steps, verbose=1, callbacks=[tensorboard_callback])
+
+    def predict(self) -> np.ndarray:
+
+        matrix = self.df[[
+            "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
+            "iphoneGyroX", "iphoneGyroY", "iphoneGyroZ",
+            "iphoneMagX", "iphoneMagY", "iphoneMagZ",
+            "orientX", "orientY", "orientZ", "orientW"
+        ]].to_numpy()
+
+        steps = len(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
+        generator = self._generate_training_samples(matrix)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = "logs/evaluate/orient{timestamp}".format(timestamp=timestamp)
+        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+        return self.model.predict(generator, steps=steps, verbose=1, callbacks=[tensorboard_callback])
 
     def display_model(self) -> str:
         """display_model will return the model's summary. 
