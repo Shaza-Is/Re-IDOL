@@ -5,15 +5,15 @@ import os
 import datetime
 
 from tensorflow.keras import Input
-from typing import Generator
+from typing import Generator, Tuple
 from pandas import DataFrame
+from string import Template
 
 from app.core.config import (
     REORIENT_NET_EPOCHS, 
     REORIENT_NET_LEARNING_RATE
 )
-from app.nn_models.nn_orient_loss import ReOrientLoss
-import app.nn_models.nn_orient_loss
+from app.nn_models.nn_orient_loss import ReOrientLoss, quat_metric
 from app.nn_models.nn_orient import build_reorient
 
 
@@ -74,12 +74,12 @@ class OrientTrainer(object):
                     yield([xa_batch, xg_batch, xm_batch],[y_theta_batch])
         
     
-    def compile_model(self, latest_checkpoint: str = "") -> None:
+    def compile_model(self, latest_checkpoint: Tuple[str, int, float, float]) -> None:
         """compile_model compiles the tensorflow model
         """
 
         if latest_checkpoint:
-            self.model = tf.keras.models.load_model(latest_checkpoint, compile = False)
+            self.model = tf.keras.models.load_model(latest_checkpoint[0], compile = False)
         else:
             input1 = Input((100, 3), dtype="float32")
             input2 = Input((100, 3), dtype="float32")
@@ -90,11 +90,11 @@ class OrientTrainer(object):
 
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
-            metrics= [app.nn_models.nn_orient_loss.quat_metric],
+            metrics= [quat_metric],
             loss = ReOrientLoss()
         )
 
-    def train_model(self) -> None:
+    def train_model(self, initial_epoch=0) -> None:
         """train_model generates the training samples and then
         trains the models in batches
         """
@@ -122,8 +122,8 @@ class OrientTrainer(object):
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         log_dir = "logs/fit/orient{timestamp}".format(timestamp=timestamp)
-        checkpoint = """saves/orient/checkpoints_orient_building{building_num}/
-            orient{timestamp}.hdf5""".format(building_num=self.building_num, timestamp=timestamp)
+        checkpoint = Template("saves/orient/checkpoints_orient_building${building_num}/${timestamp}_orient_chkpt_epoch_{epoch:03d}_loss_{loss:.4f}_metric_{metric_quat_diff:.4f}.hdf5")
+        checkpoint = checkpoint.substitute(building_num=self.building_num, timestamp=timestamp)
 
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
@@ -132,7 +132,8 @@ class OrientTrainer(object):
 
         self.model.fit(
             generator, 
-            epochs=REORIENT_NET_EPOCHS, 
+            epochs=REORIENT_NET_EPOCHS,
+            initial_epoch=initial_epoch, 
             verbose=1, 
             steps_per_epoch=steps,
             callbacks=[tensorboard_callback, checkpoint_callback]

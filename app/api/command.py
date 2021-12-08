@@ -67,10 +67,15 @@ class CommandLine(object):
             df = initialize_data(train_args.option)
 
             latest_checkpoint = get_latest_checkpoint("orient", train_args.option)
+            initial_epoch = 0 
+
+            if latest_checkpoint[1] > 0: 
+                initial_epoch = latest_checkpoint[1]
+
             trainer = OrientTrainer(train_args.option, df, is_reduced=True)
             trainer.compile_model(latest_checkpoint=latest_checkpoint)
             trainer.display_model()
-            trainer.train_model()
+            trainer.train_model(initial_epoch=initial_epoch)
 
             # logger.info("ReOrient Net training finished. Model weights have been saved.")
             # logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))

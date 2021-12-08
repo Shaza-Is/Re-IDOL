@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-import numpy as np
+import re
 import joblib
 
 from pandas import DataFrame
@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from app.models.options import Option
 
-from typing import List
+from typing import List, Tuple
     
 def get_files(option: IntEnum, is_training: bool = True) -> List[str]: 
     """get_files retrieves all the file paths related 
@@ -102,10 +102,9 @@ def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
         return results
 
 
-def get_latest_checkpoint(model: str, option: int) -> str:
+def get_latest_checkpoint(model: str, option: int) -> Tuple[str, int, float, float]:
     checkpoints_path = f"saves/{model}/checkpoints_{model}_building{option}"
-    latest_checkpoint = ""
-
+    latest_checkpoint = ()
 
     if not os.path.exists(checkpoints_path):
         os.mkdir(checkpoints_path)
@@ -114,7 +113,11 @@ def get_latest_checkpoint(model: str, option: int) -> str:
     checkpoints = glob(f"{checkpoints_path}/*.hdf5")
 
     if checkpoints:
-        latest_checkpoint = checkpoints[-1]
+        file_path = checkpoints[0]
+        epoch = int(re.search("epoch_(.*?)_", file_path).group(1))
+        loss = float(re.search("loss_(.*?)_", file_path).group(1))
+        metric = float(re.search("metric_(.*?)\\.hdf5", file_path).group(1))
+        latest_checkpoint = (file_path, epoch, loss, metric)
     
     return latest_checkpoint
 
