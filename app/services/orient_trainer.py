@@ -31,7 +31,7 @@ class OrientTrainer(object):
         self.building_num = int(building_num)
 
         if is_reduced: 
-            length = int(df.shape[0] / 128)
+            length = int(df.shape[0] / 14)
             self.df = df[:length]
         else: 
             self.df = df

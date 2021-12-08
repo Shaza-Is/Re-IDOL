@@ -61,9 +61,12 @@ class ReOrientLoss(tf.keras.losses.Loss):
     delta = tf.math.scalar_mul(2.0, tf.multiply(v, atan_))                  
     delta = tf.expand_dims(delta, -1)
     
-    e = tf.eye(3, batch_shape=[64])
-
-    sig_inv = tf.linalg.inv(sig) 
+    e = tf.keras.backend.epsilon() * tf.eye(3, batch_shape=[64])
+    try:
+       sig_inv = tf.matrix_inverse(sig)#tf.linalg.inv(sig) 
+    except:
+       print('sig_inv failed')
+       sig_inv = e
     m_ = tf.matmul(sig_inv, delta)
     m = tf.matmul(delta, m_, transpose_a=True)
 
