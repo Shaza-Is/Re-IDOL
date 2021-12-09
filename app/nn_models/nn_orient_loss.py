@@ -61,7 +61,7 @@ class ReOrientLoss(tf.keras.losses.Loss):
     delta = tf.math.scalar_mul(2.0, tf.multiply(v, atan_))                  
     delta = tf.expand_dims(delta, -1)
     
-    e = tf.keras.backend.epsilon() * tf.eye(3, batch_shape=[64])
+    e = 0.05 * tf.eye(3, batch_shape=[64])
     try:
        sig_inv = tf.matrix_inverse(sig)#tf.linalg.inv(sig) 
     except:
