@@ -101,7 +101,8 @@ class PosTrainer(object):
 
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = POS_NET_LEARNING_RATE),
-            loss = POS_NET_LOSS
+            loss = POS_NET_LOSS,
+            metrics = ["mse"]
         )
 
     
