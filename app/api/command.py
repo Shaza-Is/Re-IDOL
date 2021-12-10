@@ -3,12 +3,15 @@ import sys
 import os
 
 from loguru import logger
+from pprint import pprint
 
 from app.resources.constants import (
     COMMAND_LINE_OPTIONS, 
-    COMMAND_LINE_DESCRIPTION, 
-    CMD_TRAIN_DESCRIPTION,
-    CMD_TEST_DESCRIPTION
+    COMMAND_LINE_DESCRIPTION,
+    CMD_TRAIN_ORIENT_DESCRIPTION, 
+    CMD_TEST_ORIENT_DESCRIPTION,
+    CMD_TRAIN_POS_DESCRIPTION,
+    CMD_TEST_POS_DESCRIPTION
 )
 from app.services.orient_trainer import OrientTrainer
 from app.services.pos_trainer import PosTrainer
@@ -42,7 +45,7 @@ class CommandLine(object):
         
         getattr(self, args.command)()
 
-    def train(self):
+    def train_orient(self):
         """Train is used to perform training with one of 
         the neural networks. There are three options to use here: 
         1 = Building 1
@@ -51,7 +54,7 @@ class CommandLine(object):
         """
 
         parser = argparse.ArgumentParser(
-            description = CMD_TRAIN_DESCRIPTION
+            description = CMD_TRAIN_ORIENT_DESCRIPTION
         )
         parser.add_argument("--option", required=True)
         args = vars(parser.parse_args(sys.argv[2:]))
@@ -72,29 +75,49 @@ class CommandLine(object):
             if latest_checkpoint_orient and latest_checkpoint_orient[1] > 0: 
                 initial_epoch_orient = latest_checkpoint_orient[1]
 
-            trainer = OrientTrainer(train_args.option, df, is_reduced=False)
+            trainer = OrientTrainer(train_args.option, df, is_reduced=True)
             trainer.compile_model(latest_checkpoint=latest_checkpoint_orient)
             trainer.display_model()
             trainer.train_model(initial_epoch=initial_epoch_orient)
-            results = trainer.predict()
 
             logger.info("ReOrient Net training finished. Model has been saved.")
             logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
-            
+
+        except ValueError as error:
+            logger.error(str(error))
+            tb_sup.finalize()
+            exit(1)
+
+    def train_pos(self):
+        parser = argparse.ArgumentParser(
+            description = CMD_TRAIN_POS_DESCRIPTION
+        )
+        parser.add_argument("--option", required=True)
+        args = vars(parser.parse_args(sys.argv[2:]))
+        tensorboard_log_path = "logs/fit"
+        tb_sup = TensorboardSupervisor(tensorboard_log_path)
+
+        try:
+            train_args = CommonArgs.parse_obj(args)
+            logger.info("Attempting to train PosNet on Building {option}".format(option=train_args.option))
+            logger.info("Starting Tensorboard server at http://localhost:6006")
+
+            df = initialize_data(train_args.option)
+
             latest_checkpoint_pos = get_latest_checkpoint("pos", train_args.option)
             initial_epoch_pos = 0
 
             if latest_checkpoint_pos and latest_checkpoint_pos[1] > 0: 
                 initial_epoch_pos = latest_checkpoint_pos[1]
 
-            trainer2 = PosTrainer(train_args.option, df, results, is_reduced=True)
-            trainer2.compile_model(latest_checkpoint=latest_checkpoint_pos)
-            trainer2.display_model()
-            trainer2.train_model(initial_epoch=initial_epoch_pos)
+            trainer = PosTrainer(train_args.option, df, is_reduced=True)
+            trainer.compile_model(latest_checkpoint=latest_checkpoint_pos)
+            trainer.display_model()
+            trainer.train_model(initial_epoch=initial_epoch_pos)
 
-            logger.info("Pos Net training finished. Model weights have been saved.")
+            logger.info("PosNet training finished. Model weights have been saved.")
             logger.info("Shutting down tensorboard server.")
-            tb_sup.finalize() 
+            tb_sup.finalize()  
 
         except ValueError as error:
             logger.error(str(error))
@@ -111,7 +134,7 @@ class CommandLine(object):
         """
 
         parser = argparse.ArgumentParser(
-            description = CMD_TRAIN_DESCRIPTION
+            description = CMD_TEST_ORIENT_DESCRIPTION
         )
         parser.add_argument("--option", required=True)
         args = vars(parser.parse_args(sys.argv[2:]))

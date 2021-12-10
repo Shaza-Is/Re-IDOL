@@ -28,10 +28,10 @@ tf.random.set_seed(SEED)
 class OrientTrainer(object):
 
     def __init__(self, building_num: int, df: DataFrame, is_reduced: bool = False):
-        self.building_num = int(building_num)
+        self.building_num = building_num
 
         if is_reduced: 
-            length = int(df.shape[0] / 14)
+            length = int(df.shape[0] / 128)
             self.df = df[:length]
         else: 
             self.df = df
@@ -82,7 +82,8 @@ class OrientTrainer(object):
         
     
     def compile_model(self, latest_checkpoint: Tuple[str, int, float, float]) -> None:
-        """[summary]
+        """compile_model will compile a model taking into account the latest
+        checkpoint
 
         Args:
             latest_checkpoint (Tuple[str, int, float, float]): [description]
@@ -139,7 +140,7 @@ class OrientTrainer(object):
         checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint)
 
 
-        self.model.fit(
+        results = self.model.fit(
             generator, 
             epochs=REORIENT_NET_EPOCHS,
             initial_epoch=initial_epoch, 
@@ -149,6 +150,8 @@ class OrientTrainer(object):
         )
 
         self.model.save(save_file_path)
+
+        return results
 
     def evaluate_model(self) -> None: 
         self.model = tf.keras.models.load_model("saves/orient/building1", compile=False)
@@ -177,16 +180,12 @@ class OrientTrainer(object):
             "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
             "iphoneGyroX", "iphoneGyroY", "iphoneGyroZ",
             "iphoneMagX", "iphoneMagY", "iphoneMagZ",
-            "orientX", "orientY", "orientZ", "orientW"
         ]].to_numpy()
 
         steps = len(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
         generator = self._generate_training_samples(matrix)
-        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        log_dir = "logs/evaluate/orient{timestamp}".format(timestamp=timestamp)
-        tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-        return self.model.predict(generator, steps=steps, verbose=1, callbacks=[tensorboard_callback])
+        return self.model.predict(generator, verbose=1)
 
     def display_model(self) -> str:
         """display_model will return the model's summary. 

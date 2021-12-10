@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow_graphics.geometry.transformation as tfg
 import numpy as np
 import pandas as pd
 import random
@@ -25,7 +26,7 @@ tf.random.set_seed(SEED)
 
 class PosTrainer(object):
 
-    def __init__(self, building_num: int, df: DataFrame,  orient_data: np.ndarray, is_reduced: bool = False):
+    def __init__(self, building_num: int, df: DataFrame, is_reduced: bool = False):
         self.building_num = building_num
 
         if is_reduced:
@@ -33,14 +34,28 @@ class PosTrainer(object):
             self.df = df[:length]
         else:
             self.df = df
-    
 
-        q = orient_data[0:3]
-        sigma = orient_data[3:10]
-  
+        acc = tf.convert_to_tensor(self.df[["iphoneAccX", "iphoneAccY", "iphoneAccZ"]].to_numpy())
+        gyro = tf.convert_to_tensor(self.df[["iphoneGyroX", "iphoneGyroY", "iphoneGyroZ"]].to_numpy())
+        quats = tf.convert_to_tensor(self.df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
+
+        new_acc = tfg.quaternion.rotate(acc, quats).numpy()
+        new_gyro = tfg.quaternion.rotate(gyro, quats).numpy()
+
+        new_df_acc = pd.DataFrame(data=new_acc, columns=["iphoneAccX", "iphoneAccY", "iphoneAccZ"])
+        new_df_gyro = pd.DataFrame(data=new_gyro, columns=["iphoneGyroX", "iphoneGyroY", "iphoneGyroZ"])
+
+        self.df.loc[:,"iphoneAccX"] = new_df_acc["iphoneAccX"]
+        self.df.loc[:,"iphoneAccY"] = new_df_acc["iphoneAccY"]
+        self.df.loc[:,"iphoneAccZ"] = new_df_acc["iphoneAccZ"]
+
+        self.df.loc[:,"iphoneGyroX"] = new_df_gyro["iphoneGyroX"]
+        self.df.loc[:,"iphoneGyroY"] = new_df_gyro["iphoneGyroY"]
+        self.df.loc[:,"iphoneGyroZ"] = new_df_gyro["iphoneGyroZ"]
+
 
     def _generate_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
-        """[summary]
+        """generate_samples creates a generator for the training samples for posnet
 
         Args:
             matrix (np.ndarray): [description]
@@ -100,18 +115,18 @@ class PosTrainer(object):
 
         save_file_path = f"saves/pos/building{self.building_num}"
 
-        pos_data = self.df[[
+        matrix = self.df[[
+            "iphoneAccX", "iphoneAccY", "iphoneAccZ",
+            "iphoneGyroX", "iphoneGyroY", "iphoneGyroZ",
             "processedPosX", "processedPosY"
         ]].to_numpy()
-
-        matrix = np.hstack([np.random.rand(pos_data.shape[0], 6), pos_data])
         generator = self._generate_samples(matrix)
         
-        steps = len(pos_data)
+        steps = len(self.df[["processedPosX", "processedPosY"]].to_numpy())
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         log_dir = "logs/fit/pos{timestamp}".format(timestamp=timestamp)
-        checkpoint = Template("saves/pos/checkpoints_pos_building${building_num}/${timestamp}_pos_chkpt_epoch_{epoch:03d}_loss_{loss:.4f}_metric_{metric_quat_diff:.4f}.hdf5")
+        checkpoint = Template("saves/pos/checkpoints_pos_building${building_num}/${timestamp}_pos_chkpt_epoch_{epoch:03d}_loss_{loss:.4f}_metric_{mse:.4f}.hdf5")
         checkpoint = checkpoint.substitute(building_num=self.building_num, timestamp=timestamp)
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
@@ -131,7 +146,4 @@ class PosTrainer(object):
         return self.model.summary()
 
     def evaluate_model(self) -> None:
-        pass
-
-    def _preprocess_data():
         pass

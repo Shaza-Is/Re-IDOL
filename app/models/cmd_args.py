@@ -1,7 +1,8 @@
 from pydantic import BaseModel, ValidationError, validator
 
 from app.resources.constants import (
-    COMMON_ARGS_VALIDATION_ERROR_INCORRECT_NUMBER, COMMON_ARGS_VALIDATION_ERROR_NOT_INT, 
+    COMMON_ARGS_VALIDATION_ERROR_INCORRECT_NUMBER, 
+    COMMON_ARGS_VALIDATION_ERROR_NOT_INT, 
     COMMON_ARGS_VALIDATION_ERROR_NOT_A_NUMBER
 )
 
@@ -22,7 +23,7 @@ class CommonArgs(BaseModel):
 
     @validator("option")
     def validate_option(cls, value: str):
-        """validate_option makes sure that the option provide is from 1 to 3, everything
+        """validate_option makes sure that the option provided is from 1 to 3, everything
         else is considered invalid.
 
         Args:
@@ -40,3 +41,4 @@ class CommonArgs(BaseModel):
             return numerical_value
         except ValueError as error:
             raise ValueError(COMMON_ARGS_VALIDATION_ERROR_NOT_A_NUMBER)
+
