@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from app.models.options import Option
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict
     
 def get_files(option: IntEnum, is_training: bool = True) -> List[str]: 
     """get_files retrieves all the file paths related 
@@ -122,8 +122,32 @@ def get_latest_checkpoint(model: str, option: int) -> Tuple[str, int, float, flo
     return latest_checkpoint
 
 
-def initialize_data(option: IntEnum, is_training: bool = False) -> DataFrame:
-    """initialize_data will return a DataFrame with all the 
+def initialize_test_data(option: IntEnum) -> Dict[int, DataFrame]: 
+    files = get_files(option)
+    trajectories = {}
+
+    for index, file in enumerate(files): 
+        df = pd.read_feather(file)
+        mag_data = df[["iphoneMagX", "iphoneMagY", "iphoneMagZ"]].values.tolist()
+        result = apply_minmax_scaling(mag_data)
+        df2 = pd.DataFrame(result, columns=["iphoneMagX", "iphoneMagY", "iphoneMagZ"])
+        df["iphoneMagX"] = df2["iphoneMagX"]
+        df["iphoneMagY"] = df2["iphoneMagY"]
+        df["iphoneMagZ"] = df2["iphoneMagZ"]
+
+        df["iphoneAccX"] = -1*df["iphoneAccX"]
+        df["iphoneAccY"] = -1*df["iphoneAccY"]
+        df["iphoneGyroX"] = -1*df["iphoneGyroX"]
+        df["iphoneGyroY"] = -1*df["iphoneGyroY"]
+        df["iphoneMagX"] = -1*df["iphoneMagX"]
+        df["iphoneMagY"] = -1*df["iphoneMagY"]
+
+        trajectories.update({index: df})
+
+    return trajectories
+
+def initialize_training_data(option: IntEnum, is_training: bool = False) -> DataFrame:
+    """initialize_trainin_data will return a DataFrame with all the 
     data present for one building.  
     """
     files = ""

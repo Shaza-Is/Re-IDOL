@@ -3,7 +3,6 @@ import sys
 import os
 
 from loguru import logger
-from pprint import pprint
 
 from app.resources.constants import (
     COMMAND_LINE_OPTIONS, 
@@ -18,7 +17,7 @@ from app.services.pos_trainer import PosTrainer
 from app.services.tensorboard_process import TensorboardSupervisor
 from app.models.options import Option
 from app.models.cmd_args import CommonArgs 
-from app.utils.initializers import initialize_data, get_latest_checkpoint
+from app.utils.initializers import initialize_training_data, initialize_test_data, get_latest_checkpoint
 
 class CommandLine(object):
     """This is the command line interface 
@@ -67,7 +66,7 @@ class CommandLine(object):
             logger.info("Attempting to train ReOrient Net on Building {option}".format(option=train_args.option))
             logger.info("Starting Tensorboard server at http://localhost:6006")
 
-            df = initialize_data(train_args.option)
+            df = initialize_training_data(train_args.option)
 
             latest_checkpoint_orient = get_latest_checkpoint("orient", train_args.option)
             initial_epoch_orient = 0 
@@ -81,7 +80,10 @@ class CommandLine(object):
             trainer.train_model(initial_epoch=initial_epoch_orient)
 
             logger.info("ReOrient Net training finished. Model has been saved.")
-            logger.info("Attempting to train Pos Net {option}".format(option=train_args.option))
+
+            trainer.predict()
+            # pprint(results.shape)
+            tb_sup.finalize()
 
         except ValueError as error:
             logger.error(str(error))
@@ -102,7 +104,7 @@ class CommandLine(object):
             logger.info("Attempting to train PosNet on Building {option}".format(option=train_args.option))
             logger.info("Starting Tensorboard server at http://localhost:6006")
 
-            df = initialize_data(train_args.option)
+            df = initialize_training_data(train_args.option)
 
             latest_checkpoint_pos = get_latest_checkpoint("pos", train_args.option)
             initial_epoch_pos = 0
@@ -150,10 +152,11 @@ class CommandLine(object):
 
             logger.info("Testing neural network on building {option}".format(option=test_args.option))
 
-            df = initialize_data(test_args.option, is_training = False)
+            df = initialize_training_data(test_args.option)
+            trajectories = initialize_test_data(test_args.option)
 
             trainer = OrientTrainer(test_args.option, df, is_reduced = True)
-            trainer.evaluate_model()
+            trainer.evaluate_model(trajectories)
             tb_sup.finalize()
 
         except ValueError as error:
