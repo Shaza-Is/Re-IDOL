@@ -84,7 +84,6 @@ python main.py train_orient --option=<option number 1-3>
 python main.py train_pos --option=<option number 1-3>
 ```
 
->📋  Describe how to train the models, with example commands on how to train the models in your paper, including the full training procedure and appropriate hyperparameters.
 
 ## Evaluation
 
@@ -102,7 +101,6 @@ python main.py test_orient --option=<option number 1-3>
 python main.py test_pos --option=<option number 1-3>
 ```
 
->📋  Describe how to evaluate the trained models on benchmarks reported in the paper, give commands that produce the results (section below).
 
 ## Pre-trained Models
 
