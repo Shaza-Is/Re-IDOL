@@ -117,6 +117,7 @@ Our model achieves the following performance on :
 
 ## Contributing
 
+Uses Apache License, see LICENSE for more details. 
 
 >📋  Pick a licence and describe how to contribute to your code repository. 
 
