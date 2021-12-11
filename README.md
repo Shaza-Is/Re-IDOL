@@ -56,22 +56,21 @@ pip install -r requirements.txt
     c. Download and extract the datasets from [here](https://zenodo.org/record/4484093). Extract each building into 
     datasets.
 
->📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
-
-## Preprocessing
-
-To run preprocessing steps for training, run this command: 
-
-```python
-python main.py preprocess
-```
 
 ## Training
 
 To train the model(s) in the paper, run this command:
 
+### OrientNet 
+
 ```python
-python main.py train --option=<option number 1-3>
+python main.py train_orient --option=<option number 1-3>
+```
+
+### PosNet 
+
+```python
+python main.py train_pos --option=<option number 1-3>
 ```
 
 >📋  Describe how to train the models, with example commands on how to train the models in your paper, including the full training procedure and appropriate hyperparameters.
@@ -80,8 +79,16 @@ python main.py train --option=<option number 1-3>
 
 To test the model(s) in the paper, run this command: 
 
+### OrientNet 
+
 ```python
-python main.py test --option=<option number 1-3>
+python main.py test_orient --option=<option number 1-3>
+```
+
+### PosNet 
+
+```python
+python main.py test_pos --option=<option number 1-3>
 ```
 
 >📋  Describe how to evaluate the trained models on benchmarks reported in the paper, give commands that produce the results (section below).
