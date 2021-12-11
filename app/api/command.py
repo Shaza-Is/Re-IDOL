@@ -74,7 +74,7 @@ class CommandLine(object):
             if latest_checkpoint_orient and latest_checkpoint_orient[1] > 0: 
                 initial_epoch_orient = latest_checkpoint_orient[1]
 
-            trainer = OrientTrainer(train_args.option, df, is_reduced=True)
+            trainer = OrientTrainer(train_args.option, df, is_reduced=False)
             trainer.compile_model(latest_checkpoint=latest_checkpoint_orient)
             trainer.display_model()
             trainer.train_model(initial_epoch=initial_epoch_orient)
