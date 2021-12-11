@@ -127,7 +127,7 @@ class CommandLine(object):
             if latest_checkpoint_pos and latest_checkpoint_pos[1] > 0: 
                 initial_epoch_pos = latest_checkpoint_pos[1]
 
-            trainer = PosTrainer(train_args.option, df, is_reduced=True)
+            trainer = PosTrainer(train_args.option, df, is_reduced=False)
             trainer.compile_model(latest_checkpoint=latest_checkpoint_pos)
             trainer.display_model()
             trainer.train_model(initial_epoch=initial_epoch_pos)
