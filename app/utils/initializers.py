@@ -80,11 +80,11 @@ def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
     to reapply it later on with test data.
 
     Args:
-        mag_data (List[List[float]]): nx3 matrix containing X, Y, Z coordinates
+        mag_data (List[List[float]]): n x 3 matrix containing X, Y, Z coordinates
         with magnetometer data.
 
     Returns:
-        List[List[float]]: nx3 matrix containing rescaled data. 
+        List[List[float]]: n x 3 matrix containing rescaled data. 
     """
     scaler = None
     file_path = "saves/scaler/minmax.save"
@@ -103,6 +103,16 @@ def apply_minmax_scaling(mag_data: List[List[float]]) -> List[List[float]]:
 
 
 def get_latest_checkpoint(model: str, option: int) -> Tuple[str, int, float, float]:
+    """get_latest_checkpoint returns the latest checkpoint that was saved
+    after an epoch for a neural network
+
+    Args:
+        model (str): the model name
+        option (int): the building option
+
+    Returns:
+        Tuple[str, int, float, float]: a tuple containing the checkpoint file path, epoch number, loss and metric
+    """
     checkpoints_path = f"saves/{model}/checkpoints_{model}_building{option}"
     latest_checkpoint = ()
 
@@ -122,7 +132,17 @@ def get_latest_checkpoint(model: str, option: int) -> Tuple[str, int, float, flo
     return latest_checkpoint
 
 
-def initialize_test_data(option: IntEnum) -> Dict[int, DataFrame]: 
+def initialize_test_data(option: IntEnum) -> Dict[int, DataFrame]:
+    """initialize_test_data creates a set of data frames based on 
+    the trajectories in the datasets depending on the option specified. 
+
+    Args:
+        option (IntEnum): The building option, can be 1, 2, or 3
+
+    Returns:
+        Dict[int, DataFrame]: A dictionary with trajectory data frames, 
+                              each key is an int representing a trajectory number.
+    """     
     files = get_files(option)
     trajectories = {}
 
@@ -147,7 +167,7 @@ def initialize_test_data(option: IntEnum) -> Dict[int, DataFrame]:
     return trajectories
 
 def initialize_training_data(option: IntEnum, is_training: bool = False) -> DataFrame:
-    """initialize_trainin_data will return a DataFrame with all the 
+    """initialize_training_data will return a DataFrame with all the 
     data present for one building.  
     """
     files = ""

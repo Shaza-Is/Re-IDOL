@@ -7,7 +7,8 @@ COMMAND_LINE_OPTIONS = """nn <command> [<args>]
 The most commonly used nn commands are:
     train_orient --option=(number 1-3)     Trains OrientNet on a building, building options range from 1 to 3. 
     train_pos    --option=(number 1-3)     Trains PosNet on a building, building options range from 1 to 3, 
-    test         --option=(number 1-3)     Tests selected network, options range from 1 to 3.
+    test_orient  --option=(number 1-3)     Tests OrientNet on a building, building options range from 1 to 3.
+    test_pos     --option=(number 1-3)     Tests PosNet on a building, building options range from 1 to 3. 
 
 """
 

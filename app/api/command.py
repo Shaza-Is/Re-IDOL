@@ -29,6 +29,8 @@ class CommandLine(object):
     """
 
     def __init__(self):
+        """constructor for CommandLine object.
+        """
         parser = argparse.ArgumentParser(
             description = COMMAND_LINE_DESCRIPTION ,
             usage = COMMAND_LINE_OPTIONS
@@ -45,11 +47,15 @@ class CommandLine(object):
         getattr(self, args.command)()
 
     def train_orient(self):
-        """Train is used to perform training with one of 
-        the neural networks. There are three options to use here: 
-        1 = Building 1
-        2 = Building 2 
-        3 = Building 3
+        """train_orient trains the orientation network. 
+        
+        example: python main.py train_orient --option=1
+
+        Building options are as follows: 
+
+            1 = Building 1
+            2 = Building 2 
+            3 = Building 3
         """
 
         parser = argparse.ArgumentParser(
@@ -82,7 +88,6 @@ class CommandLine(object):
             logger.info("ReOrient Net training finished. Model has been saved.")
 
             trainer.predict()
-            # pprint(results.shape)
             tb_sup.finalize()
 
         except ValueError as error:
@@ -91,6 +96,16 @@ class CommandLine(object):
             exit(1)
 
     def train_pos(self):
+        """train_pos trains the orientation network. 
+        
+        example: python main.py train_pos --option=1
+
+        building options are as follows:
+        
+            1 = Building 1
+            2 = Building 2 
+            3 = Building 3
+        """
         parser = argparse.ArgumentParser(
             description = CMD_TRAIN_POS_DESCRIPTION
         )
@@ -127,9 +142,13 @@ class CommandLine(object):
             exit(1)
 
 
-    def test(self):
-        """test is used to perform testing with one of the neural networks
-        for that was trained for each building. There are three options to use here: 
+    def test_orient(self):
+        """test_orient evaluates the orientation network with a particular building.
+
+        example: python main.py test_orient --option=1
+
+        Building options are as follows: 
+        
         1 = Building 1
         2 = Building 2
         3 = Building 3
@@ -150,12 +169,55 @@ class CommandLine(object):
                 logger.error("No saved models, cannot test model. Please train model before calling test function.")
                 exit(1)
 
-            logger.info("Testing neural network on building {option}".format(option=test_args.option))
+            latest_checkpoint = get_latest_checkpoint("orient", test_args.option)
+
+            logger.info("Testing OrientNet on building {option}".format(option=test_args.option))
 
             df = initialize_training_data(test_args.option)
             trajectories = initialize_test_data(test_args.option)
 
             trainer = OrientTrainer(test_args.option, df, is_reduced = True)
+            trainer.evaluate_model(trajectories, latest_checkpoint)
+            tb_sup.finalize()
+
+        except ValueError as error:
+            logger.error(str(error))
+            tb_sup.finalize()
+            exit(1)
+
+    def test_pos(self):
+        """test_pos evaluates the position network with a particular building. 
+
+        example: python main.py test_pos --option=1
+
+        Building options are as follows: 
+
+        1 = Building 1
+        2 = Building 2
+        3 = Building 3
+        """
+
+        parser = argparse.ArgumentParser(
+            description = CMD_TEST_POS_DESCRIPTION
+        )
+        parser.add_argument("--option", required=True)
+        args = vars(parser.parse_args(sys.argv[2:]))
+        tensorboard_log_path = "logs/evaluate"
+        tb_sup = TensorboardSupervisor(tensorboard_log_path)
+
+        try:
+            test_args = CommonArgs.parse_obj(args)
+            
+            if not os.path.exists("saves/pos/"):
+                logger.error("No saved models, cannot test model. Please train model before calling test function.")
+                exit(1)
+
+            logger.info("Testing PosNet on building {option}".format(option=test_args.option))
+
+            df = initialize_training_data(test_args.option)
+            trajectories = initialize_test_data(test_args.option)
+
+            trainer = PosTrainer(test_args.option, df, is_reduced = True)
             trainer.evaluate_model(trajectories)
             tb_sup.finalize()
 

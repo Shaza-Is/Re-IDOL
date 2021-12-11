@@ -4,6 +4,7 @@ import random
 import os
 import datetime
 
+from loguru import logger
 from tensorflow.keras import Input
 from typing import Generator, Tuple, Dict
 from pandas import DataFrame
@@ -24,6 +25,13 @@ tf.random.set_seed(SEED)
 class OrientTrainer(object):
 
     def __init__(self, building_num: int, df: DataFrame, is_reduced: bool = False):
+        """constructor for OrientTrainer
+
+        Args:
+            building_num (int): the building number.
+            df (DataFrame): the data to train/test the network.
+            is_reduced (bool, optional): used to do training on a reduced sample. Defaults to False.
+        """
         self.building_num = building_num
 
         if is_reduced: 
@@ -34,21 +42,15 @@ class OrientTrainer(object):
 
 
     def _generate_training_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
-        """generate_training_samples takes a matrix and separates into 
-        batches to provide to the neural network. These batches are separated 
-        into sizes of 64 x 100. The values are divided as follows: 
-
-        Independent Variables:
-        - Magnetometer Readings
-        - Gyroscope Readings
-        - Accelerometer  Readings 
-
-        Dependent Variables: 
-        - Orientation Quaternion - (W, X, Y, Z) 
+        """_generate_training_samples creates a generator with batches to provide data
+        to the training function
 
         Args:
-            matrix (np.ndarray): Data taken from training information. 
-            batch_size (int, optional): Size of batches. Defaults to 64.
+            matrix (np.ndarray): [matrix with data to input to OrientNet]
+            batch_size (int, optional): [batch size of 64]. Defaults to 64.
+
+        Yields:
+            Generator[np.ndarray, None, None]: a generator that returns 100 x 9 matrices in batches of 64
         """
         while True:
             acc = np.array([row[0:3].tolist() for row in matrix])
@@ -78,7 +80,16 @@ class OrientTrainer(object):
         
     
     def _generate_prediction_samples(self, matrix: np.ndarray, batch_size: int = 64) -> Generator[np.ndarray, None, None]:
+        """_generate_prediction_samples creates a generator with batches to provide data
+        to the prediction function
 
+        Args:
+            matrix (np.ndarray): [matrix with data to input to OrientNet]
+            batch_size (int, optional): [batch size of 64]. Defaults to 64.
+
+        Yields:
+            Generator[np.ndarray, None, None]: [a generator that returns 100 x 9 matrices in batches of 64]
+        """        
         while True:
             acc = np.array([row[0:3].tolist() for row in matrix])
             gyro = np.array([row[3:6].tolist() for row in matrix])
@@ -103,11 +114,12 @@ class OrientTrainer(object):
                     yield [[xa_batch, xg_batch, xm_batch]]
 
     def compile_model(self, latest_checkpoint: Tuple[str, int, float, float]) -> None:
-        """compile_model will compile a model taking into account the latest
-        checkpoint
+        """compile_model builds an OrientNet model, if latest checkpoint is available it will build a
+        model from the last time the model was trained. 
 
         Args:
-            latest_checkpoint (Tuple[str, int, float, float]): [description]
+            latest_checkpoint (Tuple[str, int, float, float]): a tuple containing a file path to the checkpoint, \
+            the last epoch, loss and metric. 
         """
 
         if latest_checkpoint:
@@ -128,16 +140,11 @@ class OrientTrainer(object):
 
     def train_model(self, initial_epoch=0) -> None:
         """train_model generates the training samples and then
-        trains the models in batches of 64
+        trains the OrientNet model in batches of 64
 
         Args:
-            initial_epoch (int, optional): [Epoch number to start model training]. Defaults to 0. 
+            initial_epoch (int, optional): epoch number to start model training. defaults to 0. 
         """
-    
-        save_file_path = f"saves/orient/building{self.building_num}"
-
-        if not os.path.exists(save_file_path):
-            os.mkdir(save_file_path)
 
         matrix = self.df[[
             "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
@@ -170,10 +177,15 @@ class OrientTrainer(object):
             callbacks=[tensorboard_callback, checkpoint_callback]
         )
 
-        self.model.save(save_file_path)
 
-    def evaluate_model(self, trajectories: Dict[int, DataFrame]) -> None: 
-        self.model = tf.keras.models.load_model("saves/orient/building1", compile=False)
+    def evaluate_model(self, trajectories: Dict[int, DataFrame], latest_checkpoint: Tuple[str, int, float, float]) -> None:
+        """evaluate_model evaluates OrientNet against each trajectory in the datasets. 
+
+        Args:
+            trajectories (Dict[int, DataFrame]): a dictionary that contains each individual trajectory
+            latest_checkpoint (Tuple[str, int, float, float]): a checkpoint to load the last model that was trained
+        """         
+        self.model = tf.keras.models.load_model(latest_checkpoint[0], compile=False)
         self.model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = REORIENT_NET_LEARNING_RATE),
             loss = MyLossRMSE())
         self.display_model()
@@ -193,9 +205,17 @@ class OrientTrainer(object):
             log_dir = "logs/evaluate/orient_trajectory_{trajectory_num}_{timestamp}".format(timestamp=timestamp, trajectory_num=trajectory_num)
             tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
+            logger.info(f"OrientNet testing on trajectory {trajectory_num}")
+
             self.model.evaluate(generator, steps=steps, verbose=1, callbacks=[tensorboard_callback])
 
     def predict(self) -> np.ndarray:
+        """predict returns a number of predictions based on 
+        data that is fed to it. 
+
+        Returns:
+            np.ndarray: output matrix with predictions made
+        """
 
         matrix = self.df[[
             "iphoneAccX", "iphoneAccY", "iphoneAccZ", 
@@ -210,10 +230,9 @@ class OrientTrainer(object):
    
 
     def display_model(self) -> str:
-        """display_model will return the model's summary. 
-
-        Returns:
-            [str]: a string with the model summary
+        """display_model returns OrientNet's summary that 
+        specifies the layers in the model along with other 
+        information such as parameters. 
         """
-        return self.model.summary()
+        self.model.summary()
 

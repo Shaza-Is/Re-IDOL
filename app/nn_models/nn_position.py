@@ -12,6 +12,14 @@ from app.core.config import (
 )
 
 def build_position(inputs: List[Input]) -> Model:
+    """build_position builds the position network
+
+    Args:
+        inputs (List[Input]): a list of inputs representing Accelerometer and Gyroscope values. 
+
+    Returns:
+        Model: a keras model.
+    """
 
     input_layer = layers.Concatenate()([inputs[0], inputs[1]])
 
