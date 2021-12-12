@@ -176,7 +176,7 @@ class CommandLine(object):
             df = initialize_training_data(test_args.option)
             trajectories = initialize_test_data(test_args.option)
 
-            trainer = OrientTrainer(test_args.option, df, is_reduced = True)
+            trainer = OrientTrainer(test_args.option, df, is_reduced = False)
             trainer.evaluate_model(trajectories, latest_checkpoint)
             tb_sup.finalize()
 
@@ -217,7 +217,7 @@ class CommandLine(object):
             df = initialize_training_data(test_args.option)
             trajectories = initialize_test_data(test_args.option)
 
-            trainer = PosTrainer(test_args.option, df, is_reduced = True)
+            trainer = PosTrainer(test_args.option, df, is_reduced = False)
             trainer.evaluate_model(trajectories)
             tb_sup.finalize()
 

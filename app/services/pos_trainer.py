@@ -38,7 +38,7 @@ class PosTrainer(object):
         self.building_num = building_num
 
         if is_reduced:
-            length = int(df.shape[0] / 128)
+            length = int(df.shape[0] / 12)
             self.df = df[:length]
         else:
             self.df = df
@@ -54,12 +54,14 @@ class PosTrainer(object):
         Args:
             df (DataFrame): a data frame containing the orientation and position data.
         """
-        acc = tf.convert_to_tensor(df[["iphoneAccX", "iphoneAccY", "iphoneAccZ"]].to_numpy())
-        gyro = tf.convert_to_tensor(df[["iphoneGyroX", "iphoneGyroY", "iphoneGyroZ"]].to_numpy())
-        quats = tf.convert_to_tensor(df[["orientX", "orientY", "orientZ", "orientW"]].to_numpy())
+        acc = tf.convert_to_tensor(df[["iphoneAccX", "iphoneAccY", "iphoneAccZ"]])
+        gyro = tf.convert_to_tensor(df[["iphoneGyroX", "iphoneGyroY", "iphoneGyroZ"]])
+        quats = tf.convert_to_tensor(df[["orientX", "orientY", "orientZ", "orientW"]])
+        #print(acc[:5,:])
 
         new_acc = tfg.quaternion.rotate(acc, quats).numpy()
         new_gyro = tfg.quaternion.rotate(gyro, quats).numpy()
+        #print(new_acc[:5,:])
 
         new_df_acc = pd.DataFrame(data=new_acc, columns=["iphoneAccX", "iphoneAccY", "iphoneAccZ"])
         new_df_gyro = pd.DataFrame(data=new_gyro, columns=["iphoneGyroX", "iphoneGyroY", "iphoneGyroZ"])
