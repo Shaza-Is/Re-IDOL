@@ -31,4 +31,4 @@ REORIENT_OPTIMIZER = "Adam"
 
 POS_NET_OPTIMIZER = "Adam"
 POS_NET_LOSS = "mse"
-# POS_NET_METRICS = "mape"
+POS_NET_METRICS = "mape"

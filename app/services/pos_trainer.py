@@ -12,7 +12,9 @@ from string import Template
 from loguru import logger
 
 from app.resources.constants import (
-    POS_NET_LOSS
+    POS_NET_LOSS,
+    POS_NET_OPTIMIZER,
+    POS_NET_METRICS
 )
 from app.core.config import (
     POS_NET_EPOCHS, 
@@ -128,7 +130,7 @@ class PosTrainer(object):
         self.model.compile(
             optimizer = tf.keras.optimizers.Adam(learning_rate = POS_NET_LEARNING_RATE),
             loss = POS_NET_LOSS,
-            metrics = ["mse"]
+            metrics = POS_NET_METRICS
         )
 
     
