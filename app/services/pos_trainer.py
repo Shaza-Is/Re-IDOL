@@ -96,10 +96,10 @@ class PosTrainer(object):
             y_batch = np.zeros((batch_size,2))
 
             current_batch_number = 0
-            for index in range(len(pos)):
+            for index in range(len(pos) -1):
                 xa_batch[current_batch_number,:,:] = acc[index,:]
                 xg_batch[current_batch_number,:,:] = gyro[index,:]
-                y_batch[current_batch_number,:] = pos[index, :]
+                y_batch[current_batch_number,:] = pos[index+1, :] - pos[index,:]
 
                 current_batch_number += 1
 
