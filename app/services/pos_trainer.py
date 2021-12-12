@@ -155,7 +155,7 @@ class PosTrainer(object):
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
         log_dir = "logs/fit/pos{timestamp}".format(timestamp=timestamp)
-        checkpoint = Template("saves/pos/checkpoints_pos_building${building_num}/${timestamp}_pos_chkpt_epoch_{epoch:03d}_loss_{loss:.4f}_metric_{mse:.4f}.hdf5")
+        checkpoint = Template("saves/pos/checkpoints_pos_building${building_num}/${timestamp}_pos_chkpt_epoch_{epoch:03d}_loss_{loss:.4f}_metric_{mape:.4f}.hdf5")
         checkpoint = checkpoint.substitute(building_num=self.building_num, timestamp=timestamp)
 
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)

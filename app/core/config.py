@@ -23,7 +23,7 @@ POS_NET_BATCH_SIZE = os.getenv("POS_NET_BATCH_SIZE", 64)
 
 POS_NET_LSTM_1 = os.getenv("POS_NET_LSTM_1", 100)
 POS_NET_LSTM_2 = os.getenv("POS_NET_LSTM_2", 100)
-POS_NET_DENSE_1 = os.getenv("POS_NET_DENSE_1", 100)
+POS_NET_DENSE_1 = os.getenv("POS_NET_DENSE_1", 50)
 POS_NET_DENSE_2 = os.getenv("POS_NET_DENSE_2", 20)
 POS_NET_OUTPUT_1 = os.getenv("POS_NET_OUTPUT_1", 2)
 
