@@ -56,6 +56,17 @@ pip install -r requirements.txt
     c. Download and extract the datasets from [here](https://zenodo.org/record/4484093). Extract each building into 
     datasets.
 
+6. To install tensorflow graphics
+    a. Run `git clone https://github.com/tensorflow/graphics.git`.
+    b. `cd` to the directory where you cloned tensorflow graphics.
+    c. Run `python -m venv .venv`
+    d. Run `source .venv/bin/activate` (Bash), `.\.venv\Scripts\activate.ps1` (Windows Powershell) or 
+    `.\.venv\Scripts\activate.bat` (Windows Cmd)
+    e. Run `pip install wheel`
+    f. Run `python setup.py bdist_wheel`
+    g. `cd` to Re-IDOL's location.
+    h. Run `pip install /path/to/tensorflow-graphics-location/dist/tensorflow_graphics-2021.12.11-py3-none-any.whl`
+
 
 ## Training
 
@@ -73,7 +84,6 @@ python main.py train_orient --option=<option number 1-3>
 python main.py train_pos --option=<option number 1-3>
 ```
 
->📋  Describe how to train the models, with example commands on how to train the models in your paper, including the full training procedure and appropriate hyperparameters.
 
 ## Evaluation
 
@@ -91,7 +101,6 @@ python main.py test_orient --option=<option number 1-3>
 python main.py test_pos --option=<option number 1-3>
 ```
 
->📋  Describe how to evaluate the trained models on benchmarks reported in the paper, give commands that produce the results (section below).
 
 ## Pre-trained Models
 
