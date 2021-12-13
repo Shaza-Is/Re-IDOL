@@ -104,7 +104,7 @@ python main.py test_pos --option=<option number 1-3>
 
 ## Pre-trained Models
 
-You can find pretrained models in the directory: pretrained/Buildings<building number>/<model name>
+You can find pretrained models in the directory: pretrained/Buildings"<number 1-3>"/OrientNet
 
 ## Results
 
