@@ -12,9 +12,9 @@ from app.core.config import REORIENT_NET_LOOKBACK, REORIENT_NET_BATCH_SIZE
 
 class PreProcessor():
 
-    def __init__(self, train_csv: str, test_csv: str):
-        self.df_train = pd.read_csv(train_csv)
-        self.df_test = pd.read_csv(test_csv)
+    def __init__(self):
+        self.df_train = pd.read_feather("datasets/building1/known/0.feather")
+        # self.df_test = pd.read_feather("datasets/building1/unknown/0.feather")
     
     def ellipsoid_fit(self, point_data: np.ndarray, mode: int = 0) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         X = point_data[:, 0]

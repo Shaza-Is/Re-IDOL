@@ -143,7 +143,7 @@ def initialize_test_data(option: IntEnum) -> Dict[int, DataFrame]:
         Dict[int, DataFrame]: A dictionary with trajectory data frames, 
                               each key is an int representing a trajectory number.
     """     
-    files = get_files(option)
+    files = get_files(option, is_training=False)
     trajectories = {}
 
     for index, file in enumerate(files): 
@@ -166,7 +166,7 @@ def initialize_test_data(option: IntEnum) -> Dict[int, DataFrame]:
 
     return trajectories
 
-def initialize_training_data(option: IntEnum, is_training: bool = False) -> DataFrame:
+def initialize_training_data(option: IntEnum, is_training: bool = True) -> DataFrame:
     """initialize_training_data will return a DataFrame with all the 
     data present for one building.  
     """
