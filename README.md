@@ -114,12 +114,13 @@ You can download pretrained models here:
 
 Our model achieves the following performance on :
 
-### [Image Classification on ImageNet](https://paperswithcode.com/sota/image-classification-on-imagenet)
+### Dataset
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4484093.svg)](https://doi.org/10.5281/zenodo.4484093)
 
-| Model name       | Top 1 Accuracy | Top 5 Accuracy |
-| ---------------- | -------------- | -------------- |
-| ReOrientNet      | x              | x              |
-| PosNet           | y              | y              | 
+| Model name       | Building 1     | Building 2     | Building 3     |
+| ---------------- | -------------- | -------------- | -------------- |
+| OrientNet (rad)  | x              | x              | x              |
+| PosNet (meter)   | y              | y              | y              | 
 
 >📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. 
 
@@ -128,6 +129,6 @@ Our model achieves the following performance on :
 
 Uses Apache License, see LICENSE for more details. 
 
->📋  Pick a licence and describe how to contribute to your code repository. 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
