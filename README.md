@@ -108,15 +108,15 @@ You can find pretrained models in the directory: pretrained/Buildings"<number 1-
 
 ## Results
 
-Our model achieves the following performance on the known set (training) of buildings (1-3)| the unknown set (1-3):
+Our model achieves the following performance on the known set (training) of buildings (1-3)/ the unknown set (1-3):
 
 ### Dataset
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4484093.svg)](https://doi.org/10.5281/zenodo.4484093)
 
 | Model name       | Building 1     | Building 2     | Building 3     |
 | ---------------- | -------------- | -------------- | -------------- |
-| OrientNet (rad)  | x    |  test   | x     |  test  | tbd            |
-| PosNet (meter)   | y    |  test   | y     |  test  | tbd            | 
+| OrientNet (rad)  | x    /  test   | x     /  test  | tbd            |
+| PosNet (meter)   | y    /  test   | y     /  test  | tbd            | 
 
 >📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. 
 
