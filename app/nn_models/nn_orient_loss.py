@@ -92,7 +92,9 @@ class MyLossRMSE(tf.keras.losses.Loss):
     q_est = tf.slice(y_pred,
                     begin=[0,0],
                     size=[-1,4])  
-    return tf.sqrt(tf.reduce_mean((q_est - q)**2, axis=-1))
+    d = tfg.quaternion.relative_angle(q_est, q)
+    d_without_nans = tf.where(tf.math.is_nan(d), tf.zeros_like(d), d)
+    return tf.sqrt(tf.reduce_mean((d_without_nans)**2, axis=-1))
 
 
 def quat_diff(y_true, y_pred):
