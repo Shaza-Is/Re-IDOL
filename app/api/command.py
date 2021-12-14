@@ -212,13 +212,15 @@ class CommandLine(object):
                 logger.error("No saved models, cannot test model. Please train model before calling test function.")
                 exit(1)
 
+            latest_checkpoint = get_latest_checkpoint("pos", test_args.option)
+
             logger.info("Testing PosNet on building {option}".format(option=test_args.option))
 
             df = initialize_training_data(test_args.option)
             trajectories = initialize_test_data(test_args.option)
 
             trainer = PosTrainer(test_args.option, df, is_reduced = False)
-            trainer.evaluate_model(trajectories)
+            trainer.evaluate_model(trajectories, latest_checkpoint)
             tb_sup.finalize()
 
         except ValueError as error:

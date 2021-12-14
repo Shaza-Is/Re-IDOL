@@ -178,13 +178,13 @@ class PosTrainer(object):
         """
         self.model.summary()
 
-    def evaluate_model(self, trajectories: Dict[int, DataFrame]) -> None:
+    def evaluate_model(self, trajectories: Dict[int, DataFrame], latest_checkpoint: Tuple[str, int, float, float]) -> None:
         """evaluate_model tests the model by running 
 
         Args:
             trajectories (Dict[int, DataFrame]): [dictionary with trajectory dataframes]
         """
-        self.model = tf.keras.models.load_model(f"saves/pos/building{self.building_num}", compile=False)
+        self.model = tf.keras.models.load_model(latest_checkpoint[0], compile=False)
         self.model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = POS_NET_LEARNING_RATE),
             loss = POS_NET_LOSS)
         self.display_model()
